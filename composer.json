@@ -1,0 +1,79 @@
+{
+    "name": "netresearch/nr-xliff-streaming",
+    "type": "typo3-cms-extension",
+    "description": "High-performance streaming XLIFF parser for TYPO3 supporting large translation files (10MB+) with constant memory footprint",
+    "keywords": [
+        "TYPO3",
+        "extension",
+        "XLIFF",
+        "parser",
+        "streaming",
+        "XMLReader",
+        "translation",
+        "localization",
+        "performance",
+        "memory-efficient"
+    ],
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Netresearch DTT GmbH",
+            "email": "info@netresearch.de",
+            "homepage": "https://www.netresearch.de",
+            "role": "Developer"
+        }
+    ],
+    "homepage": "https://github.com/netresearch/t3x-nr-xliff-streaming",
+    "support": {
+        "issues": "https://github.com/netresearch/t3x-nr-xliff-streaming/issues",
+        "source": "https://github.com/netresearch/t3x-nr-xliff-streaming",
+        "docs": "https://docs.typo3.org/p/netresearch/nr-xliff-streaming/main/en-us/"
+    },
+    "require": {
+        "php": "^8.2 || ^8.3 || ^8.4",
+        "typo3/cms-core": "^13.4"
+    },
+    "require-dev": {
+        "typo3/testing-framework": "^8.0",
+        "typo3/coding-standards": "^0.8",
+        "phpunit/phpunit": "^11.0",
+        "phpstan/phpstan": "^2.0",
+        "rector/rector": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Netresearch\\NrXliffStreaming\\": "Classes/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Netresearch\\NrXliffStreaming\\Tests\\": "Tests/"
+        }
+    },
+    "config": {
+        "vendor-dir": ".Build/vendor",
+        "bin-dir": ".Build/bin",
+        "allow-plugins": {
+            "typo3/class-alias-loader": true,
+            "typo3/cms-composer-installers": true
+        }
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "nr_xliff_streaming",
+            "web-dir": ".Build/web"
+        }
+    },
+    "scripts": {
+        "test:unit": ".Build/bin/phpunit -c Build/phpunit/UnitTests.xml",
+        "test:functional": ".Build/bin/phpunit -c Build/phpunit/FunctionalTests.xml",
+        "test": [
+            "@test:unit",
+            "@test:functional"
+        ],
+        "lint:php": "find . -name '*.php' ! -path './.Build/*' -exec php -l {} \\;",
+        "lint": "@lint:php",
+        "fix": ".Build/bin/php-cs-fixer fix",
+        "analyse": ".Build/bin/phpstan analyse"
+    }
+}

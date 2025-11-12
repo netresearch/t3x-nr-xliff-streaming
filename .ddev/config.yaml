@@ -1,0 +1,20 @@
+name: nr-xliff-streaming
+type: typo3
+docroot: .Build/web
+php_version: "8.2"
+webserver_type: apache-fpm
+xdebug_enabled: false
+additional_hostnames: []
+additional_fqdns: []
+database:
+  type: mariadb
+  version: "10.11"
+use_dns_when_possible: true
+composer_version: "2"
+web_environment: []
+
+hooks:
+  post-start:
+    - exec: composer install
+
+nodejs_version: "20"

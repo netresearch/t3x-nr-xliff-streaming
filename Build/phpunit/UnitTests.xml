@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../.Build/vendor/phpunit/phpunit/phpunit.xsd"
+    bootstrap="../../.Build/vendor/typo3/testing-framework/Resources/Core/Build/UnitTestsBootstrap.php"
+    cacheDirectory="../../.Build/.phpunit.cache"
+    requireCoverageMetadata="true"
+    beStrictAboutCoverageMetadata="true"
+    beStrictAboutOutputDuringTests="true"
+    colors="true"
+    displayDetailsOnTestsThatTriggerWarnings="true"
+>
+    <testsuites>
+        <testsuite name="Unit tests">
+            <directory>../../Tests/Unit/</directory>
+        </testsuite>
+    </testsuites>
+
+    <source>
+        <include>
+            <directory suffix=".php">../../Classes/</directory>
+        </include>
+    </source>
+
+    <coverage ignoreDeprecatedCodeUnits="true"
+              disableCodeCoverageIgnore="true">
+        <!-- HTML coverage report removed for CI performance -->
+    </coverage>
+</phpunit>
