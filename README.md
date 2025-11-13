@@ -11,7 +11,7 @@ High-performance streaming XLIFF parser for TYPO3 supporting large translation f
 - **High Performance**: 60x faster than SimpleXML for large files (90 seconds vs 90 minutes)
 - **Memory Efficient**: 30x memory reduction (30MB vs 900MB for 108MB file)
 - **Constant Memory**: Memory usage independent of file size
-- **XLIFF Support**: XLIFF 1.0, 1.2, and 2.0 compatible
+- **XLIFF Support**: Full XLIFF 1.0, 1.2, and 2.0 support (trans-unit and unit elements)
 - **XXE Protection**: Built-in protection against XML External Entity attacks
 - **Generator Pattern**: Stream-based processing for optimal resource usage
 
@@ -73,9 +73,9 @@ final class MyTranslationService
 
 ## Supported XLIFF Versions
 
-- **XLIFF 1.0**: No namespace
-- **XLIFF 1.2**: `urn:oasis:names:tc:xliff:document:1.2`
-- **XLIFF 2.0**: `urn:oasis:names:tc:xliff:document:2.0`
+- **XLIFF 1.0**: No namespace, `<trans-unit>` elements
+- **XLIFF 1.2**: `urn:oasis:names:tc:xliff:document:1.2`, `<trans-unit>` elements
+- **XLIFF 2.0**: `urn:oasis:names:tc:xliff:document:2.0`, `<unit>` + `<segment>` elements
 
 ## Security
 

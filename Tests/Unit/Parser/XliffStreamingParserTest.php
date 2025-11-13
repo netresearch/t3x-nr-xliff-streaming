@@ -93,12 +93,47 @@ XML;
 </xliff>
 XML;
 
-        // Note: XLIFF 2.0 uses <unit> not <trans-unit>, this tests forward compatibility
-        // Current implementation focuses on XLIFF 1.x which uses <trans-unit>
         $units = iterator_to_array($this->subject->parseTransUnits($xliff));
 
-        // XLIFF 2.0 has different structure, this test documents current behavior
-        self::assertCount(0, $units, 'XLIFF 2.0 uses <unit> not <trans-unit>');
+        // XLIFF 2.0 support with <unit> and <segment> structure
+        self::assertCount(1, $units);
+        self::assertSame('test.unit', $units[0]['id']);
+        self::assertSame('Test', $units[0]['source']);
+        self::assertSame('Testen', $units[0]['target']);
+    }
+
+    #[Test]
+    public function parsesMultipleXliff20Units(): void
+    {
+        $xliff = <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="en" trgLang="de">
+    <file id="f1" original="messages">
+        <unit id="unit1">
+            <segment>
+                <source>First</source>
+                <target>Erste</target>
+            </segment>
+        </unit>
+        <unit id="unit2">
+            <segment>
+                <source>Second</source>
+                <target>Zweite</target>
+            </segment>
+        </unit>
+    </file>
+</xliff>
+XML;
+
+        $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+
+        self::assertCount(2, $units);
+        self::assertSame('unit1', $units[0]['id']);
+        self::assertSame('First', $units[0]['source']);
+        self::assertSame('Erste', $units[0]['target']);
+        self::assertSame('unit2', $units[1]['id']);
+        self::assertSame('Second', $units[1]['source']);
+        self::assertSame('Zweite', $units[1]['target']);
     }
 
     #[Test]

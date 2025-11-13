@@ -56,10 +56,10 @@ final class XliffStreamingParser
 
             // Stream through XML elements
             while ($reader->read()) {
-                // Check for trans-unit elements (handle both namespaced and non-namespaced)
+                // Check for trans-unit elements (XLIFF 1.x) or unit elements (XLIFF 2.0)
                 if (
                     $reader->nodeType === \XMLReader::ELEMENT
-                    && $reader->localName === 'trans-unit'
+                    && ($reader->localName === 'trans-unit' || $reader->localName === 'unit')
                     && $this->isXliffNamespace($reader->namespaceURI)
                 ) {
                     yield $this->extractTransUnit($reader);
@@ -148,19 +148,26 @@ final class XliffStreamingParser
             );
         }
 
+        // Handle XLIFF 2.0 <segment> wrapper
+        $sourceElement = $element;
+        if (isset($element->segment)) {
+            // XLIFF 2.0: <unit><segment><source/><target/></segment></unit>
+            $sourceElement = $element->segment;
+        }
+
         // Extract source (required)
-        $source = (string)$element->source;
+        $source = (string)$sourceElement->source;
         if ($source === '') {
             throw new InvalidXliffException(
-                sprintf('Missing required <source> element in trans-unit "%s" at line %d', $id, $line),
+                sprintf('Missing required <source> element in unit "%s" at line %d', $id, $line),
                 1700000005
             );
         }
 
-        // Extract target (optional, fallback to source if not present)
+        // Extract target (optional)
         $target = null;
-        if (isset($element->target) && $element->target->getName() !== '') {
-            $target = (string)$element->target;
+        if (isset($sourceElement->target) && $sourceElement->target->getName() !== '') {
+            $target = (string)$sourceElement->target;
         }
 
         return [
