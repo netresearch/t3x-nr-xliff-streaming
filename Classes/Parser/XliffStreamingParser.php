@@ -19,7 +19,7 @@ use Netresearch\NrXliffStreaming\Exception\InvalidXliffException;
  *
  * @author Netresearch DTT GmbH <info@netresearch.de>
  */
-final class XliffStreamingParser
+final class XliffStreamingParser implements XliffParserInterface
 {
     /**
      * XLIFF 1.2 namespace URI

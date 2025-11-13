@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xliff [
+    <!ENTITY lol "lol">
+    <!ENTITY lol1 "&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;">
+    <!ENTITY lol2 "&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;">
+]>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file target-language="en" datatype="plaintext" original="messages">
+        <body>
+            <trans-unit id="billion.laughs">
+                <source>&lol2;</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

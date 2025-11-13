@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file target-language="ja" datatype="plaintext" original="messages">
+        <body>
+            <trans-unit id="unicode.test">
+                <source>Hello 世界 🌍</source>
+                <target>こんにちは 世界 🌏</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

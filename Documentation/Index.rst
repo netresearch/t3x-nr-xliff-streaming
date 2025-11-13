@@ -116,6 +116,45 @@ High-performance streaming XLIFF parser for TYPO3 supporting large translation f
             XXE protection mechanisms, security best practices, and how the
             extension prevents XML attacks.
 
+   .. container:: col-12 col-md-6 pl-0 pr-3 py-3 m-0
+
+      .. container:: card px-0 h-100
+
+         .. rst-class:: card-header h3
+
+            .. rubric:: :ref:`FAQ <faq>`
+
+         .. container:: card-body
+
+            Frequently asked questions about usage, performance, security,
+            and integration.
+
+   .. container:: col-12 col-md-6 pl-0 pr-3 py-3 m-0
+
+      .. container:: card px-0 h-100
+
+         .. rst-class:: card-header h3
+
+            .. rubric:: :ref:`Troubleshooting <troubleshooting>`
+
+         .. container:: card-body
+
+            Solutions to common issues with installation, parsing, performance,
+            and integration.
+
+   .. container:: col-12 col-md-6 pl-0 pr-3 py-3 m-0
+
+      .. container:: card px-0 h-100
+
+         .. rst-class:: card-header h3
+
+            .. rubric:: :ref:`Changelog <changelog>`
+
+         .. container:: card-body
+
+            Version history and release notes documenting all changes and
+            improvements.
+
 .. toctree::
    :hidden:
    :maxdepth: 2
@@ -126,3 +165,6 @@ High-performance streaming XLIFF parser for TYPO3 supporting large translation f
    API/Index
    Performance/Index
    Security/Index
+   FAQ/Index
+   Troubleshooting/Index
+   Changelog/Index

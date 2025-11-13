@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="en" trgLang="de">
+    <file id="f1" original="messages">
+        <unit id="test.unit">
+            <segment>
+                <source>Test</source>
+                <target>Testen</target>
+            </segment>
+        </unit>
+    </file>
+</xliff>
