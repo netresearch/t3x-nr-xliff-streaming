@@ -74,6 +74,9 @@
         "lint:php": "find . -name '*.php' ! -path './.Build/*' -exec php -l {} \\;",
         "lint": "@lint:php",
         "fix": ".Build/bin/php-cs-fixer fix",
-        "analyse": ".Build/bin/phpstan analyse"
+        "analyse": ".Build/bin/phpstan analyse",
+        "doc-init": "docker run --rm --pull always -v $(pwd)/Documentation:/project -t ghcr.io/typo3-documentation/render-guides:latest --config=Documentation --no-progress",
+        "doc-make": "docker run --rm --pull always -v $(pwd):/project -t ghcr.io/typo3-documentation/render-guides:latest --config=Documentation --no-progress",
+        "doc-watch": "docker run --rm --pull always -v $(pwd):/project -p 8000:8000 -t ghcr.io/typo3-documentation/render-guides:latest --config=Documentation --no-progress --watch"
     }
 }

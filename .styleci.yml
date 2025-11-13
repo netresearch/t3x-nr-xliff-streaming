@@ -1,0 +1,58 @@
+preset: psr12
+
+risky: false
+
+version: 8
+
+finder:
+  exclude:
+    - ".Build"
+    - "Documentation"
+  name:
+    - "*.php"
+
+enabled:
+  - alpha_ordered_imports
+  - binary_operator_spaces
+  - blank_line_after_opening_tag
+  - concat_with_spaces
+  - function_declaration
+  - lowercase_cast
+  - magic_constant_casing
+  - method_separation
+  - native_function_casing
+  - no_blank_lines_after_class_opening
+  - no_blank_lines_after_phpdoc
+  - no_blank_lines_between_uses
+  - no_empty_statement
+  - no_leading_import_slash
+  - no_leading_namespace_whitespace
+  - no_short_bool_cast
+  - no_singleline_whitespace_before_semicolons
+  - no_trailing_comma_in_list_call
+  - no_trailing_comma_in_singleline_array
+  - no_unused_imports
+  - no_whitespace_in_blank_line
+  - object_operator_without_whitespace
+  - phpdoc_indent
+  - phpdoc_no_access
+  - phpdoc_no_package
+  - phpdoc_order
+  - phpdoc_scalar
+  - phpdoc_separation
+  - phpdoc_single_line_var_spacing
+  - phpdoc_trim
+  - phpdoc_var_without_name
+  - self_accessor
+  - short_array_syntax
+  - single_quote
+  - standardize_not_equals
+  - ternary_operator_spaces
+  - trailing_comma_in_multiline_array
+  - trim_array_spaces
+  - unalign_equals
+  - whitespace_after_comma_in_array
+
+disabled:
+  - align_double_arrow
+  - align_equals

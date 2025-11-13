@@ -1,0 +1,9 @@
+# cat=basic; type=comment; label=Extension Information
+# This extension provides a streaming XLIFF parser and requires no configuration.
+# The parser is automatically available via dependency injection.
+
+# cat=advanced/enable; type=boolean; label=Debug Mode: Enable debug logging for parser operations (development only)
+debugMode = 0
+
+# cat=advanced/enable; type=int+; label=Memory Limit Warning Threshold (MB): Log warning if memory usage exceeds this threshold
+memoryWarningThreshold = 100
