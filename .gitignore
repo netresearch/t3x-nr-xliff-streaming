@@ -16,3 +16,9 @@ Thumbs.db
 # TYPO3
 /typo3/
 /typo3conf/ext/
+
+# Quality tools
+/.php-cs-fixer.cache
+
+# Claude Code / Serena MCP
+/.serena/

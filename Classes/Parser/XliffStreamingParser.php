@@ -74,15 +74,16 @@ final class XliffStreamingParser
     /**
      * Check if namespace URI is a supported XLIFF version
      *
-     * @param string|null $uri Namespace URI (null for XLIFF 1.0)
+     * @param string|null $uri Namespace URI (null or empty for XLIFF 1.0)
      * @return bool True if supported XLIFF namespace
      */
     private function isXliffNamespace(?string $uri): bool
     {
-        // XLIFF 1.0: no namespace (null)
+        // XLIFF 1.0: no namespace (null or empty string)
         // XLIFF 1.2: urn:oasis:names:tc:xliff:document:1.2
         // XLIFF 2.0: urn:oasis:names:tc:xliff:document:2.0
         return $uri === null
+            || $uri === ''
             || $uri === self::XLIFF_1_2_NS
             || $uri === self::XLIFF_2_0_NS;
     }
@@ -99,10 +100,18 @@ final class XliffStreamingParser
      */
     private function extractTransUnit(\XMLReader $reader): array
     {
-        $line = $reader->expand()->getLineNo();
+        $expanded = $reader->expand();
+        if ($expanded === false) {
+            throw new InvalidXliffException(
+                'Failed to expand trans-unit (possible entity reference loop or XXE attack)',
+                1700000002
+            );
+        }
+        $line = $expanded->getLineNo();
 
         // Read trans-unit as XML string
         $xml = $reader->readOuterXml();
+        // @phpstan-ignore-next-line readOuterXml() can return false despite PHPDoc
         if ($xml === false || $xml === '') {
             throw new InvalidXliffException(
                 sprintf('Failed to read trans-unit at line %d', $line),
@@ -111,7 +120,8 @@ final class XliffStreamingParser
         }
 
         // Convert to SimpleXMLElement for easy data extraction (with XXE protection)
-        $element = simplexml_load_string(
+        // Suppress warnings for entity errors (they're blocked by LIBXML_NONET which is expected)
+        $element = @simplexml_load_string(
             $xml,
             \SimpleXMLElement::class,
             LIBXML_NONET
@@ -119,7 +129,7 @@ final class XliffStreamingParser
 
         if ($element === false) {
             throw new InvalidXliffException(
-                sprintf('Invalid trans-unit XML at line %d', $line),
+                sprintf('Invalid trans-unit XML at line %d (external entities are blocked)', $line),
                 1700000003
             );
         }

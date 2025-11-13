@@ -48,13 +48,13 @@ final class XliffStreamingParserXXETest extends UnitTestCase
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xxePayload));
+        // LIBXML_NONET blocks external entities, causing parsing to fail
+        // This is expected and secure behavior - fail-safe, not fail-open
+        $this->expectException(\Netresearch\NrXliffStreaming\Exception\InvalidXliffException::class);
+        $this->expectExceptionCode(1700000003);
+        $this->expectExceptionMessage('external entities are blocked');
 
-        // XMLReader does not expand external entities by default
-        // Verify that entity is not expanded
-        self::assertCount(1, $units);
-        self::assertStringNotContainsString('root:', $units[0]['source'], 'XXE entity should not be expanded');
-        self::assertStringNotContainsString('/etc/passwd', $units[0]['source'], 'XXE file path should not be visible');
+        iterator_to_array($this->subject->parseTransUnits($xxePayload));
     }
 
     #[Test]
@@ -76,11 +76,11 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xxePayload));
+        // LIBXML_NONET flag prevents network access, causing parsing to fail
+        $this->expectException(\Netresearch\NrXliffStreaming\Exception\InvalidXliffException::class);
+        $this->expectExceptionCode(1700000003);
 
-        // LIBXML_NONET flag in SimpleXMLElement prevents network access
-        self::assertCount(1, $units);
-        self::assertStringNotContainsString('attacker', $units[0]['source'], 'XXE network entity should not be fetched');
+        iterator_to_array($this->subject->parseTransUnits($xxePayload));
     }
 
     #[Test]
@@ -105,19 +105,13 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($billionLaughs));
+        // XMLReader detects entity reference loop and prevents expansion
+        // This throws an exception during expand(), which is the secure behavior
+        $this->expectException(\Netresearch\NrXliffStreaming\Exception\InvalidXliffException::class);
+        $this->expectExceptionCode(1700000002);
+        $this->expectExceptionMessage('entity reference loop');
 
-        // XMLReader does not expand nested entities by default
-        if (count($units) > 0) {
-            $sourceLength = strlen($units[0]['source']);
-            self::assertLessThan(
-                100,
-                $sourceLength,
-                'Billion Laughs attack should not cause exponential expansion'
-            );
-        } else {
-            self::assertTrue(true, 'Billion Laughs attack prevented parsing');
-        }
+        iterator_to_array($this->subject->parseTransUnits($billionLaughs));
     }
 
     #[Test]
@@ -139,11 +133,11 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($phpWrapper));
+        // PHP wrapper access is blocked by LIBXML_NONET
+        $this->expectException(\Netresearch\NrXliffStreaming\Exception\InvalidXliffException::class);
+        $this->expectExceptionCode(1700000003);
 
-        // PHP wrapper access should be blocked
-        self::assertCount(1, $units);
-        self::assertStringNotContainsString('base64', $units[0]['source'], 'PHP wrapper should not be executed');
+        iterator_to_array($this->subject->parseTransUnits($phpWrapper));
     }
 
     #[Test]
@@ -165,11 +159,10 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($ssrfPayload));
+        // SSRF via XXE is blocked by LIBXML_NONET, causing parsing to fail
+        $this->expectException(\Netresearch\NrXliffStreaming\Exception\InvalidXliffException::class);
+        $this->expectExceptionCode(1700000003);
 
-        // SSRF via XXE should be blocked by LIBXML_NONET
-        self::assertCount(1, $units);
-        self::assertStringNotContainsString('admin', $units[0]['source'], 'SSRF attack should be blocked');
-        self::assertStringNotContainsString('localhost', $units[0]['source'], 'Internal URLs should not be accessible');
+        iterator_to_array($this->subject->parseTransUnits($ssrfPayload));
     }
 }

@@ -9,6 +9,4 @@ namespace Netresearch\NrXliffStreaming\Exception;
  *
  * @author Netresearch DTT GmbH <info@netresearch.de>
  */
-final class InvalidXliffException extends \RuntimeException
-{
-}
+final class InvalidXliffException extends \RuntimeException {}
