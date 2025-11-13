@@ -2,7 +2,7 @@ includes:
     - .Build/vendor/phpstan/phpstan/conf/bleedingEdge.neon
 
 parameters:
-    level: 9
+    level: max
     paths:
         - Classes
         - Tests
@@ -11,3 +11,4 @@ parameters:
         - Documentation/*
     bootstrapFiles:
         - .Build/vendor/autoload.php
+    treatPhpDocTypesAsCertain: false

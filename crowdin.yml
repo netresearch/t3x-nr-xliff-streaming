@@ -1,0 +1,35 @@
+project_id: '0'  # Replace with actual Crowdin project ID when available
+preserve_hierarchy: true
+files:
+  # Extension labels
+  - source: /Resources/Private/Language/locallang.xlf
+    translation: /Resources/Private/Language/%two_letters_code%.locallang.xlf
+    languages_mapping:
+      two_letters_code:
+        de: de
+        fr: fr
+        nl: nl
+        it: it
+        es: es
+        pt: pt
+        pl: pl
+        cs: cs
+        ru: ru
+        ja: ja
+        zh-CN: zh
+  # Backend module labels (if any)
+  - source: /Resources/Private/Language/locallang_mod.xlf
+    translation: /Resources/Private/Language/%two_letters_code%.locallang_mod.xlf
+    languages_mapping:
+      two_letters_code:
+        de: de
+        fr: fr
+        nl: nl
+        it: it
+        es: es
+        pt: pt
+        pl: pl
+        cs: cs
+        ru: ru
+        ja: ja
+        zh-CN: zh

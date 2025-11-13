@@ -110,9 +110,9 @@ final class XliffStreamingParser implements XliffParserInterface
         $line = $expanded->getLineNo();
 
         // Read trans-unit as XML string
+        // Note: readOuterXml() can return false in practice despite PHPDoc saying string
         $xml = $reader->readOuterXml();
-        // @phpstan-ignore-next-line readOuterXml() can return false despite PHPDoc
-        if ($xml === false || $xml === '') {
+        if (!\is_string($xml) || $xml === '') {
             throw new InvalidXliffException(
                 sprintf('Failed to read trans-unit at line %d', $line),
                 1700000002
@@ -120,12 +120,18 @@ final class XliffStreamingParser implements XliffParserInterface
         }
 
         // Convert to SimpleXMLElement for easy data extraction (with XXE protection)
-        // Suppress warnings for entity errors (they're blocked by LIBXML_NONET which is expected)
-        $element = @simplexml_load_string(
-            $xml,
-            \SimpleXMLElement::class,
-            LIBXML_NONET
-        );
+        // Use libxml internal errors to avoid interfering with test framework error handlers
+        $useInternalErrors = libxml_use_internal_errors(true);
+        try {
+            $element = simplexml_load_string(
+                $xml,
+                \SimpleXMLElement::class,
+                LIBXML_NONET
+            );
+        } finally {
+            libxml_use_internal_errors($useInternalErrors);
+            libxml_clear_errors();
+        }
 
         if ($element === false) {
             throw new InvalidXliffException(

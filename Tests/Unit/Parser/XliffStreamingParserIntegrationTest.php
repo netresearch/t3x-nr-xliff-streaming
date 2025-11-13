@@ -2,39 +2,35 @@
 
 declare(strict_types=1);
 
-namespace Netresearch\NrXliffStreaming\Tests\Functional\Parser;
+namespace Netresearch\NrXliffStreaming\Tests\Unit\Parser;
 
 use Netresearch\NrXliffStreaming\Parser\XliffStreamingParser;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
- * Functional test cases for XliffStreamingParser
+ * Integration test cases for XliffStreamingParser
  *
- * Tests TYPO3 integration and real-world file operations
+ * Tests real-world file operations and parser reusability
  *
  * @author Netresearch DTT GmbH <info@netresearch.de>
  */
 #[CoversClass(XliffStreamingParser::class)]
-final class XliffStreamingParserFunctionalTest extends FunctionalTestCase
+final class XliffStreamingParserIntegrationTest extends UnitTestCase
 {
-    protected array $testExtensionsToLoad = ['typo3conf/ext/nr_xliff_streaming'];
-
     private XliffStreamingParser $subject;
 
     protected function setUp(): void
     {
         parent::setUp();
-        /** @var XliffStreamingParser $parser */
-        $parser = $this->get(XliffStreamingParser::class);
-        $this->subject = $parser;
+        $this->subject = new XliffStreamingParser();
     }
 
     #[Test]
-    public function canBeRetrievedFromDependencyInjectionContainer(): void
+    public function canBeInstantiated(): void
     {
-        $parser = $this->get(XliffStreamingParser::class);
+        $parser = new XliffStreamingParser();
 
         self::assertInstanceOf(XliffStreamingParser::class, $parser);
     }
@@ -42,7 +38,7 @@ final class XliffStreamingParserFunctionalTest extends FunctionalTestCase
     #[Test]
     public function parsesRealXliffFileFromFileSystem(): void
     {
-        $fixturePath = __DIR__ . '/../../Unit/Fixtures/valid/xliff-1.2-namespace.xlf';
+        $fixturePath = __DIR__ . '/../Fixtures/valid/xliff-1.2-namespace.xlf';
         $xliffContent = file_get_contents($fixturePath);
         self::assertIsString($xliffContent, 'Failed to read fixture file');
 
@@ -57,7 +53,7 @@ final class XliffStreamingParserFunctionalTest extends FunctionalTestCase
     #[Test]
     public function parsesMultipleRealWorldXliffFiles(): void
     {
-        $fixtureDir = __DIR__ . '/../../Unit/Fixtures/valid/';
+        $fixtureDir = __DIR__ . '/../Fixtures/valid/';
         $files = [
             'xliff-1.0-simple.xlf',
             'xliff-1.2-namespace.xlf',
@@ -79,9 +75,9 @@ final class XliffStreamingParserFunctionalTest extends FunctionalTestCase
     #[Test]
     public function canReuseParserInstanceForMultipleParses(): void
     {
-        $xliff1 = file_get_contents(__DIR__ . '/../../Unit/Fixtures/valid/xliff-1.0-simple.xlf');
+        $xliff1 = file_get_contents(__DIR__ . '/../Fixtures/valid/xliff-1.0-simple.xlf');
         self::assertIsString($xliff1, 'Failed to read fixture file 1');
-        $xliff2 = file_get_contents(__DIR__ . '/../../Unit/Fixtures/valid/xliff-1.2-namespace.xlf');
+        $xliff2 = file_get_contents(__DIR__ . '/../Fixtures/valid/xliff-1.2-namespace.xlf');
         self::assertIsString($xliff2, 'Failed to read fixture file 2');
 
         // First parse

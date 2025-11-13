@@ -9,6 +9,7 @@
     beStrictAboutOutputDuringTests="true"
     colors="true"
     displayDetailsOnTestsThatTriggerWarnings="true"
+    failOnWarning="false"
 >
     <testsuites>
         <testsuite name="Unit tests">
