@@ -20,5 +20,8 @@ Thumbs.db
 # Quality tools
 /.php-cs-fixer.cache
 
+# Performance test fixtures (large files - regenerate with Build/scripts/generate-xliff-samples.php)
+/Tests/Fixtures/Performance/*.xlf
+
 # Claude Code / Serena MCP
 /.serena/
