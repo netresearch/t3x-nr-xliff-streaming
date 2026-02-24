@@ -17,7 +17,7 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
  * - 60x speed improvement vs SimpleXML
  * - Constant memory footprint
  *
- * @author Netresearch DTT GmbH <info@netresearch.de>
+ * @author Netresearch DTT GmbH
  */
 #[CoversClass(XliffStreamingParser::class)]
 final class ParserBenchmarkTest extends UnitTestCase

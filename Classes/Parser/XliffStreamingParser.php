@@ -17,7 +17,7 @@ use Netresearch\NrXliffStreaming\Exception\InvalidXliffException;
  * - XLIFF 1.2: urn:oasis:names:tc:xliff:document:1.2
  * - XLIFF 2.0: urn:oasis:names:tc:xliff:document:2.0
  *
- * @author Netresearch DTT GmbH <info@netresearch.de>
+ * @author Netresearch DTT GmbH
  */
 final class XliffStreamingParser implements XliffParserInterface
 {

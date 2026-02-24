@@ -16,7 +16,7 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
  * - CWE-611: Improper Restriction of XML External Entity Reference
  * - CVSS 7.5-8.5 (HIGH severity)
  *
- * @author Netresearch DTT GmbH <info@netresearch.de>
+ * @author Netresearch DTT GmbH
  */
 #[CoversClass(XliffStreamingParser::class)]
 final class XliffStreamingParserXXETest extends UnitTestCase

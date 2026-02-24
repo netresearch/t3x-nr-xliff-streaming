@@ -13,7 +13,7 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 /**
  * Edge case test scenarios for XliffStreamingParser
  *
- * @author Netresearch DTT GmbH <info@netresearch.de>
+ * @author Netresearch DTT GmbH
  */
 #[CoversClass(XliffStreamingParser::class)]
 final class XliffStreamingParserEdgeCasesTest extends UnitTestCase
