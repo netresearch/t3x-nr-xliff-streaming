@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 require __DIR__ . '/../../.Build/vendor/autoload.php';
@@ -13,23 +14,22 @@ use Netresearch\NrXliffStreaming\Parser\XliffStreamingParser;
  * - Memory usage (peak)
  * - Trans-units processed per second
  */
-
 function formatBytes(int $bytes): string
 {
     $units = ['B', 'KB', 'MB', 'GB'];
-    $factor = floor((strlen((string) $bytes) - 1) / 3);
-    return sprintf("%.2f %s", $bytes / pow(1024, $factor), $units[$factor]);
+    $factor = floor((strlen((string)$bytes) - 1) / 3);
+    return sprintf('%.2f %s', $bytes / pow(1024, $factor), $units[$factor]);
 }
 
 function formatTime(float $seconds): string
 {
     if ($seconds < 1) {
-        return sprintf("%.0f ms", $seconds * 1000);
+        return sprintf('%.0f ms', $seconds * 1000);
     }
     if ($seconds < 60) {
-        return sprintf("%.2f sec", $seconds);
+        return sprintf('%.2f sec', $seconds);
     }
-    return sprintf("%.2f min", $seconds / 60);
+    return sprintf('%.2f min', $seconds / 60);
 }
 
 function runBenchmark(string $filePath, string $label): array
@@ -44,8 +44,8 @@ function runBenchmark(string $filePath, string $label): array
     }
 
     $fileSize = filesize($filePath);
-    echo "File: " . basename($filePath) . "\n";
-    echo "Size: " . formatBytes($fileSize) . "\n";
+    echo 'File: ' . basename($filePath) . "\n";
+    echo 'Size: ' . formatBytes($fileSize) . "\n";
 
     // Read file content
     $content = file_get_contents($filePath);
@@ -90,7 +90,7 @@ function runBenchmark(string $filePath, string $label): array
             }
         }
     } catch (\Exception $e) {
-        echo "ERROR: " . $e->getMessage() . "\n";
+        echo 'ERROR: ' . $e->getMessage() . "\n";
         return [];
     }
 
@@ -117,7 +117,7 @@ function runBenchmark(string $filePath, string $label): array
     echo sprintf("✓ Trans-units parsed: %s\n", number_format($count));
     echo sprintf("✓ Execution time: %s\n", formatTime($duration));
     echo sprintf("✓ Throughput: %.0f trans-units/sec\n", $unitsPerSecond);
-    echo sprintf("✓ Speed: %s/sec\n", formatBytes((int) $bytesPerSecond));
+    echo sprintf("✓ Speed: %s/sec\n", formatBytes((int)$bytesPerSecond));
     echo "\n";
     echo sprintf("Memory used: %s\n", formatBytes($memoryUsed));
     echo sprintf("Memory peak: %s\n", formatBytes($memoryPeakUsed));
@@ -183,18 +183,24 @@ echo "║                            PERFORMANCE SUMMARY                        
 echo "╚════════════════════════════════════════════════════════════════════════════════╝\n";
 echo "\n";
 
-printf("%-15s | %-10s | %-12s | %-12s | %-15s\n",
-    "File", "Trans-Units", "Time", "Memory Peak", "Throughput"
+printf(
+    "%-15s | %-10s | %-12s | %-12s | %-15s\n",
+    'File',
+    'Trans-Units',
+    'Time',
+    'Memory Peak',
+    'Throughput'
 );
 echo str_repeat('-', 80) . "\n";
 
 foreach ($results as $result) {
-    printf("%-15s | %-10s | %-12s | %-12s | %-15s\n",
+    printf(
+        "%-15s | %-10s | %-12s | %-12s | %-15s\n",
         $result['file'],
         number_format($result['transUnits']),
         formatTime($result['duration']),
         formatBytes($result['memoryPeak']),
-        sprintf("%.0f u/s", $result['unitsPerSecond'])
+        sprintf('%.0f u/s', $result['unitsPerSecond'])
     );
 }
 
