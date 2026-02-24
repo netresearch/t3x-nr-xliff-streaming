@@ -12,7 +12,7 @@ use Netresearch\NrXliffStreaming\Exception\InvalidXliffException;
  * Defines the contract for parsing XLIFF translation files.
  * Implementations may use different parsing strategies (streaming, DOM, etc.)
  *
- * @author Netresearch DTT GmbH <info@netresearch.de>
+ * @author Netresearch DTT GmbH
  */
 interface XliffParserInterface
 {

@@ -14,7 +14,7 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
  *
  * Tests real-world file operations and parser reusability
  *
- * @author Netresearch DTT GmbH <info@netresearch.de>
+ * @author Netresearch DTT GmbH
  */
 #[CoversClass(XliffStreamingParser::class)]
 final class XliffStreamingParserIntegrationTest extends UnitTestCase
