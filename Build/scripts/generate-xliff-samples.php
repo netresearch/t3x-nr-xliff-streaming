@@ -1,10 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 /**
  * Generate XLIFF sample files for performance testing
  */
-
 function generateXliffFile(string $outputPath, int $transUnitCount): void
 {
     $file = fopen($outputPath, 'w');
