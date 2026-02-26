@@ -1,103 +1,18 @@
 name: CI
-
 on:
   push:
-    branches: [ main, develop ]
   pull_request:
-    branches: [ main, develop ]
-
 permissions: {}
-
 jobs:
-  tests:
-    name: Tests (PHP ${{ matrix.php }}, TYPO3 ${{ matrix.typo3 }})
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        php: ['8.2', '8.3', '8.4']
-        typo3: ['^13.4']
-
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
-        with:
-          egress-policy: audit
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: dom, json, libxml, mbstring, pdo_sqlite
-          coverage: xdebug
-          tools: composer:v2
-
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
-
-      - name: Run PHP lint
-        run: composer lint
-
-      - name: Run PHPStan
-        run: composer analyse
-
-      - name: Run PHP-CS-Fixer (dry-run)
-        run: composer fix -- --dry-run --diff
-
-      - name: Run unit tests
-        run: composer test:unit
-
-      - name: Run unit tests with coverage
-        if: matrix.php == '8.2'
-        run: .Build/bin/phpunit -c Build/phpunit/UnitTests.xml --coverage-clover=coverage.xml
-
-      - name: Upload coverage to Codecov
-        if: matrix.php == '8.2'
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./coverage.xml
-          fail_ci_if_error: false
-
-  code-quality:
-    name: Code Quality
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
-        with:
-          egress-policy: audit
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: dom, json, libxml, mbstring
-          tools: composer:v2
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
-
-      - name: Check coding standards
-        run: composer fix -- --dry-run --diff
-
-      - name: Run static analysis
-        run: composer analyse
+  ci:
+    uses: netresearch/typo3-ci-workflows/.github/workflows/ci.yml@main
+    permissions:
+      contents: read
+    with:
+      php-versions: '["8.2", "8.3", "8.4"]'
+      typo3-versions: '["^13.4"]'
+      typo3-packages: '["typo3/cms-core"]'
+      cgl-command: 'composer fix -- --dry-run --diff'
+      phpstan-command: 'composer analyse'
+      run-rector: true
+      run-functional-tests: false
