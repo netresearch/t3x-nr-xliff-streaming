@@ -65,7 +65,7 @@
     },
     "scripts": {
         "ci:cgl": ".Build/bin/php-cs-fixer fix",
-        "ci:test:php:cgl": "@ci:cgl -- --dry-run --diff",
+        "ci:test:php:cgl": ".Build/bin/php-cs-fixer fix --dry-run --diff",
         "ci:test:php:phpstan": ".Build/bin/phpstan analyse",
         "ci:test:php:rector": ".Build/bin/rector --dry-run",
         "ci:test:php:unit": ".Build/bin/phpunit -c Build/phpunit/UnitTests.xml",
