@@ -18,12 +18,12 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 #[CoversClass(XliffStreamingParser::class)]
 final class XliffStreamingParserEdgeCasesTest extends UnitTestCase
 {
-    private XliffStreamingParser $subject;
+    private XliffStreamingParser $xliffStreamingParser;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->subject = new XliffStreamingParser();
+        $this->xliffStreamingParser = new XliffStreamingParser();
     }
 
     #[Test]
@@ -46,7 +46,7 @@ XML;
         $this->expectExceptionCode(1700000004);
         $this->expectExceptionMessage('Missing required "id" attribute');
 
-        iterator_to_array($this->subject->parseTransUnits($xliff));
+        iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
     }
 
     #[Test]
@@ -66,7 +66,7 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
         self::assertCount(1, $units);
         self::assertSame($longId, $units[0]['id']);
@@ -89,7 +89,7 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
         self::assertCount(1, $units);
         self::assertSame('component|type|placeholder[0]', $units[0]['id']);
@@ -111,7 +111,7 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
         self::assertCount(1, $units);
         self::assertSame('  Leading and trailing  ', $units[0]['source']);
@@ -134,7 +134,7 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
         self::assertCount(1, $units);
         self::assertSame('<tag> & "quotes"', $units[0]['source']);
@@ -170,8 +170,8 @@ XML;
 </xliff>
 XML;
 
-        $units1 = iterator_to_array($this->subject->parseTransUnits($xliff1));
-        $units2 = iterator_to_array($this->subject->parseTransUnits($xliff2));
+        $units1 = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff1));
+        $units2 = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff2));
 
         self::assertSame('test1', $units1[0]['id']);
         self::assertSame('test2', $units2[0]['id']);
@@ -197,7 +197,7 @@ XML;
         $this->expectExceptionCode(1700000005);
         $this->expectExceptionMessage('Missing required <source> element');
 
-        iterator_to_array($this->subject->parseTransUnits($xliff));
+        iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
     }
 
     #[Test]
@@ -217,7 +217,7 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
         self::assertCount(1, $units);
         self::assertSame('', $units[0]['target']);
@@ -240,7 +240,7 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
         self::assertCount(1, $units);
         self::assertSame('multi.segment', $units[0]['id']);
@@ -266,7 +266,7 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
         self::assertCount(1, $units);
         self::assertSame('grouped.unit', $units[0]['id']);

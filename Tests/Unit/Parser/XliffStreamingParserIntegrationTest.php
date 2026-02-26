@@ -19,20 +19,20 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 #[CoversClass(XliffStreamingParser::class)]
 final class XliffStreamingParserIntegrationTest extends UnitTestCase
 {
-    private XliffStreamingParser $subject;
+    private XliffStreamingParser $xliffStreamingParser;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->subject = new XliffStreamingParser();
+        $this->xliffStreamingParser = new XliffStreamingParser();
     }
 
     #[Test]
     public function canBeInstantiated(): void
     {
-        $parser = new XliffStreamingParser();
+        $xliffStreamingParser = new XliffStreamingParser();
 
-        self::assertInstanceOf(XliffStreamingParser::class, $parser);
+        self::assertInstanceOf(XliffStreamingParser::class, $xliffStreamingParser);
     }
 
     #[Test]
@@ -42,7 +42,7 @@ final class XliffStreamingParserIntegrationTest extends UnitTestCase
         $xliffContent = file_get_contents($fixturePath);
         self::assertIsString($xliffContent, 'Failed to read fixture file');
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xliffContent));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliffContent));
 
         self::assertCount(1, $units);
         self::assertSame('test.key', $units[0]['id']);
@@ -65,7 +65,7 @@ final class XliffStreamingParserIntegrationTest extends UnitTestCase
         foreach ($files as $file) {
             $xliffContent = file_get_contents($fixtureDir . $file);
             self::assertIsString($xliffContent, 'Failed to read fixture file: ' . $file);
-            $units = iterator_to_array($this->subject->parseTransUnits($xliffContent));
+            $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliffContent));
             $totalUnits += count($units);
         }
 
@@ -81,11 +81,11 @@ final class XliffStreamingParserIntegrationTest extends UnitTestCase
         self::assertIsString($xliff2, 'Failed to read fixture file 2');
 
         // First parse
-        $units1 = iterator_to_array($this->subject->parseTransUnits($xliff1));
+        $units1 = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff1));
         self::assertCount(1, $units1);
 
         // Second parse with same instance
-        $units2 = iterator_to_array($this->subject->parseTransUnits($xliff2));
+        $units2 = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff2));
         self::assertCount(1, $units2);
 
         // Verify different results

@@ -22,12 +22,12 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 #[CoversClass(XliffStreamingParser::class)]
 final class ParserBenchmarkTest extends UnitTestCase
 {
-    private XliffStreamingParser $subject;
+    private XliffStreamingParser $xliffStreamingParser;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->subject = new XliffStreamingParser();
+        $this->xliffStreamingParser = new XliffStreamingParser();
     }
 
     #[Test]
@@ -53,7 +53,7 @@ final class ParserBenchmarkTest extends UnitTestCase
         );
 
         $memoryBefore = memory_get_usage();
-        $parsedUnits = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $parsedUnits = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
         $memoryAfter = memory_get_usage();
         $memoryUsed = $memoryAfter - $memoryBefore;
 
@@ -87,7 +87,7 @@ final class ParserBenchmarkTest extends UnitTestCase
         $memoryBefore = memory_get_usage();
         $startTime = microtime(true);
 
-        $parsedUnits = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $parsedUnits = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
         $endTime = microtime(true);
         $memoryAfter = memory_get_usage();
@@ -124,7 +124,7 @@ final class ParserBenchmarkTest extends UnitTestCase
         );
 
         $memoryBefore = memory_get_usage();
-        $generator = $this->subject->parseTransUnits($xliff);
+        $generator = $this->xliffStreamingParser->parseTransUnits($xliff);
 
         self::assertInstanceOf(\Generator::class, $generator);
 
@@ -164,7 +164,7 @@ XML;
         $startTime = microtime(true);
 
         for ($i = 0; $i < $iterations; $i++) {
-            $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+            $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
             self::assertCount(1, $units);
         }
 

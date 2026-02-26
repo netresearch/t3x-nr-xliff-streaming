@@ -46,28 +46,28 @@ final class XliffStreamingParser implements XliffParserInterface
      */
     public function parseTransUnits(string $xmlContent): \Generator
     {
-        $reader = new \XMLReader();
+        $xmlReader = new \XMLReader();
 
         try {
             // Load XML content
-            if (!$reader->XML($xmlContent, 'UTF-8', LIBXML_NONET)) {
+            if (!$xmlReader->XML($xmlContent, 'UTF-8', LIBXML_NONET)) {
                 throw new InvalidXliffException('Failed to parse XML content', 1700000001);
             }
 
             // Stream through XML elements
-            while ($reader->read()) {
+            while ($xmlReader->read()) {
                 // Check for trans-unit elements (XLIFF 1.x) or unit elements (XLIFF 2.0)
                 if (
-                    $reader->nodeType === \XMLReader::ELEMENT
-                    && ($reader->localName === 'trans-unit' || $reader->localName === 'unit')
-                    && $this->isXliffNamespace($reader->namespaceURI)
+                    $xmlReader->nodeType === \XMLReader::ELEMENT
+                    && ($xmlReader->localName === 'trans-unit' || $xmlReader->localName === 'unit')
+                    && $this->isXliffNamespace($xmlReader->namespaceURI)
                 ) {
-                    yield $this->extractTransUnit($reader);
+                    yield $this->extractTransUnit($xmlReader);
                 }
             }
         } finally {
             // Ensure XMLReader resource is always closed
-            $reader->close();
+            $xmlReader->close();
         }
     }
 
@@ -94,24 +94,25 @@ final class XliffStreamingParser implements XliffParserInterface
      * Converts XMLReader node to SimpleXMLElement for easy data extraction
      * with XXE protection (LIBXML_NONET flag).
      *
-     * @param \XMLReader $reader XMLReader positioned at trans-unit element
+     * @param \XMLReader $xmlReader XMLReader positioned at trans-unit element
      * @return array{id: string, source: string, target: string|null, line: int}
      * @throws InvalidXliffException if trans-unit structure is invalid
      */
-    private function extractTransUnit(\XMLReader $reader): array
+    private function extractTransUnit(\XMLReader $xmlReader): array
     {
-        $expanded = $reader->expand();
+        $expanded = $xmlReader->expand();
         if ($expanded === false) {
             throw new InvalidXliffException(
                 'Failed to expand trans-unit (possible entity reference loop or XXE attack)',
                 1700000002
             );
         }
+
         $line = $expanded->getLineNo();
 
         // Read trans-unit as XML string
         // Note: readOuterXml() can return false in practice despite PHPDoc saying string
-        $xml = $reader->readOuterXml();
+        $xml = $xmlReader->readOuterXml();
         if (!\is_string($xml) || $xml === '') {
             throw new InvalidXliffException(
                 sprintf('Failed to read trans-unit at line %d', $line),
@@ -141,8 +142,8 @@ final class XliffStreamingParser implements XliffParserInterface
         }
 
         // Register namespace if present (XLIFF 1.2 / 2.0)
-        if ($reader->namespaceURI !== null) {
-            $element->registerXPathNamespace('x', $reader->namespaceURI);
+        if ($xmlReader->namespaceURI !== null) {
+            $element->registerXPathNamespace('x', $xmlReader->namespaceURI);
         }
 
         // Extract required id attribute
@@ -156,7 +157,7 @@ final class XliffStreamingParser implements XliffParserInterface
 
         // Handle XLIFF 2.0 <segment> wrapper
         $sourceElement = $element;
-        if (isset($element->segment)) {
+        if (property_exists($element, 'segment') && $element->segment !== null) {
             // XLIFF 2.0: <unit><segment><source/><target/></segment></unit>
             $sourceElement = $element->segment;
         }
@@ -172,7 +173,7 @@ final class XliffStreamingParser implements XliffParserInterface
 
         // Extract target (optional)
         $target = null;
-        if (isset($sourceElement->target) && $sourceElement->target->getName() !== '') {
+        if (property_exists($sourceElement, 'target') && $sourceElement->target !== null && $sourceElement->target->getName() !== '') {
             $target = (string)$sourceElement->target;
         }
 

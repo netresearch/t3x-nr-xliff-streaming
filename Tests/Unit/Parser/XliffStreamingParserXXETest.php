@@ -21,12 +21,12 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 #[CoversClass(XliffStreamingParser::class)]
 final class XliffStreamingParserXXETest extends UnitTestCase
 {
-    private XliffStreamingParser $subject;
+    private XliffStreamingParser $xliffStreamingParser;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->subject = new XliffStreamingParser();
+        $this->xliffStreamingParser = new XliffStreamingParser();
     }
 
     #[Test]
@@ -54,7 +54,7 @@ XML;
         $this->expectExceptionCode(1700000003);
         $this->expectExceptionMessage('external entities are blocked');
 
-        iterator_to_array($this->subject->parseTransUnits($xxePayload));
+        iterator_to_array($this->xliffStreamingParser->parseTransUnits($xxePayload));
     }
 
     #[Test]
@@ -80,7 +80,7 @@ XML;
         $this->expectException(\Netresearch\NrXliffStreaming\Exception\InvalidXliffException::class);
         $this->expectExceptionCode(1700000003);
 
-        iterator_to_array($this->subject->parseTransUnits($xxePayload));
+        iterator_to_array($this->xliffStreamingParser->parseTransUnits($xxePayload));
     }
 
     #[Test]
@@ -111,7 +111,7 @@ XML;
         $this->expectExceptionCode(1700000002);
         $this->expectExceptionMessage('entity reference loop');
 
-        iterator_to_array($this->subject->parseTransUnits($billionLaughs));
+        iterator_to_array($this->xliffStreamingParser->parseTransUnits($billionLaughs));
     }
 
     #[Test]
@@ -137,7 +137,7 @@ XML;
         $this->expectException(\Netresearch\NrXliffStreaming\Exception\InvalidXliffException::class);
         $this->expectExceptionCode(1700000003);
 
-        iterator_to_array($this->subject->parseTransUnits($phpWrapper));
+        iterator_to_array($this->xliffStreamingParser->parseTransUnits($phpWrapper));
     }
 
     #[Test]
@@ -163,6 +163,6 @@ XML;
         $this->expectException(\Netresearch\NrXliffStreaming\Exception\InvalidXliffException::class);
         $this->expectExceptionCode(1700000003);
 
-        iterator_to_array($this->subject->parseTransUnits($ssrfPayload));
+        iterator_to_array($this->xliffStreamingParser->parseTransUnits($ssrfPayload));
     }
 }

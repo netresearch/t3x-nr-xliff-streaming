@@ -18,12 +18,12 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 #[CoversClass(XliffStreamingParser::class)]
 final class XliffStreamingParserTest extends UnitTestCase
 {
-    private XliffStreamingParser $subject;
+    private XliffStreamingParser $xliffStreamingParser;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->subject = new XliffStreamingParser();
+        $this->xliffStreamingParser = new XliffStreamingParser();
     }
 
     #[Test]
@@ -43,7 +43,7 @@ final class XliffStreamingParserTest extends UnitTestCase
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
         self::assertCount(1, $units);
         self::assertSame('component|type|placeholder', $units[0]['id']);
@@ -68,7 +68,7 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
         self::assertCount(1, $units);
         self::assertSame('test.key', $units[0]['id']);
@@ -93,7 +93,7 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
         // XLIFF 2.0 support with <unit> and <segment> structure
         self::assertCount(1, $units);
@@ -125,7 +125,7 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
         self::assertCount(2, $units);
         self::assertSame('unit1', $units[0]['id']);
@@ -161,7 +161,7 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
         self::assertCount(3, $units);
         self::assertSame('key1', $units[0]['id']);
@@ -185,7 +185,7 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
         self::assertCount(1, $units);
         self::assertSame('untranslated', $units[0]['id']);
@@ -206,7 +206,7 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
         self::assertCount(0, $units, 'Empty XLIFF should yield no trans-units');
     }
@@ -218,7 +218,7 @@ XML;
 
         // Malformed XML (mismatched tags) results in no trans-units being found
         // XMLReader emits warnings but doesn't find properly structured elements
-        $units = iterator_to_array($this->subject->parseTransUnits($invalidXml));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($invalidXml));
 
         self::assertCount(0, $units, 'Malformed XML should result in no trans-units found');
     }
@@ -243,7 +243,7 @@ XML;
         $this->expectExceptionCode(1700000004);
         $this->expectExceptionMessage('Missing required "id" attribute');
 
-        iterator_to_array($this->subject->parseTransUnits($xliff));
+        iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
     }
 
     #[Test]
@@ -266,7 +266,7 @@ XML;
         $this->expectExceptionCode(1700000005);
         $this->expectExceptionMessage('Missing required <source> element');
 
-        iterator_to_array($this->subject->parseTransUnits($xliff));
+        iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
     }
 
     #[Test]
@@ -286,7 +286,7 @@ XML;
 </xliff>
 XML;
 
-        $units = iterator_to_array($this->subject->parseTransUnits($xliff));
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
         self::assertCount(1, $units);
         self::assertSame('Hello 世界 🌍', $units[0]['source']);
@@ -308,7 +308,7 @@ XML;
 </xliff>
 XML;
 
-        $generator = $this->subject->parseTransUnits($xliff);
+        $generator = $this->xliffStreamingParser->parseTransUnits($xliff);
 
         self::assertInstanceOf(\Generator::class, $generator, 'Method must return a Generator');
 
