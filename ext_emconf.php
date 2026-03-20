@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 $EM_CONF[$_EXTKEY] = [
     'title' => 'XLIFF Streaming Parser',
     'description' => 'High-performance streaming XLIFF parser supporting large translation files (10MB+) with constant memory footprint. Uses XMLReader for 30x memory reduction and 60x speed improvement over SimpleXML.',
