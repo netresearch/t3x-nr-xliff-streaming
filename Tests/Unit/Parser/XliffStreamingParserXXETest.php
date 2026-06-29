@@ -105,13 +105,23 @@ XML;
 </xliff>
 XML;
 
-        // XMLReader detects entity reference loop and prevents expansion
-        // This throws an exception during expand(), which is the secure behavior
-        $this->expectException(\Netresearch\NrXliffStreaming\Exception\InvalidXliffException::class);
-        $this->expectExceptionCode(1700000002);
-        $this->expectExceptionMessage('entity reference loop');
-
-        iterator_to_array($this->xliffStreamingParser->parseTransUnits($billionLaughs));
+        // The parser rejects the billion-laughs payload with InvalidXliffException,
+        // which is the secure behaviour. Which internal libxml rejection path fires --
+        // entity-reference-loop / failed-to-read (code 1700000002) during expand(), or
+        // "external entities are blocked" (code 1700000003) when re-reading the
+        // trans-unit -- depends on the libxml version, so we assert on the stable
+        // contract (rejection via one of the entity-protection paths) rather than the
+        // exact code or message text, which vary with the libxml version.
+        try {
+            iterator_to_array($this->xliffStreamingParser->parseTransUnits($billionLaughs));
+            self::fail('Expected InvalidXliffException for billion-laughs payload');
+        } catch (\Netresearch\NrXliffStreaming\Exception\InvalidXliffException $invalidXliffException) {
+            self::assertContains(
+                $invalidXliffException->getCode(),
+                [1700000002, 1700000003],
+                'Billion-laughs payload must be rejected by an entity-protection path',
+            );
+        }
     }
 
     #[Test]
