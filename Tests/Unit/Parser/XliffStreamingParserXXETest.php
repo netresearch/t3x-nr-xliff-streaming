@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Netresearch\NrXliffStreaming\Tests\Unit\Parser;
 
+use Netresearch\NrXliffStreaming\Exception\InvalidXliffException;
 use Netresearch\NrXliffStreaming\Parser\XliffStreamingParser;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -50,7 +51,7 @@ XML;
 
         // LIBXML_NONET blocks external entities, causing parsing to fail
         // This is expected and secure behavior - fail-safe, not fail-open
-        $this->expectException(\Netresearch\NrXliffStreaming\Exception\InvalidXliffException::class);
+        $this->expectException(InvalidXliffException::class);
         $this->expectExceptionCode(1700000003);
         $this->expectExceptionMessage('external entities are blocked');
 
@@ -77,7 +78,7 @@ XML;
 XML;
 
         // LIBXML_NONET flag prevents network access, causing parsing to fail
-        $this->expectException(\Netresearch\NrXliffStreaming\Exception\InvalidXliffException::class);
+        $this->expectException(InvalidXliffException::class);
         $this->expectExceptionCode(1700000003);
 
         iterator_to_array($this->xliffStreamingParser->parseTransUnits($xxePayload));
@@ -115,7 +116,7 @@ XML;
         try {
             iterator_to_array($this->xliffStreamingParser->parseTransUnits($billionLaughs));
             self::fail('Expected InvalidXliffException for billion-laughs payload');
-        } catch (\Netresearch\NrXliffStreaming\Exception\InvalidXliffException $invalidXliffException) {
+        } catch (InvalidXliffException $invalidXliffException) {
             self::assertContains(
                 $invalidXliffException->getCode(),
                 [1700000002, 1700000003],
@@ -144,7 +145,7 @@ XML;
 XML;
 
         // PHP wrapper access is blocked by LIBXML_NONET
-        $this->expectException(\Netresearch\NrXliffStreaming\Exception\InvalidXliffException::class);
+        $this->expectException(InvalidXliffException::class);
         $this->expectExceptionCode(1700000003);
 
         iterator_to_array($this->xliffStreamingParser->parseTransUnits($phpWrapper));
@@ -170,7 +171,7 @@ XML;
 XML;
 
         // SSRF via XXE is blocked by LIBXML_NONET, causing parsing to fail
-        $this->expectException(\Netresearch\NrXliffStreaming\Exception\InvalidXliffException::class);
+        $this->expectException(InvalidXliffException::class);
         $this->expectExceptionCode(1700000003);
 
         iterator_to_array($this->xliffStreamingParser->parseTransUnits($ssrfPayload));

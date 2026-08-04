@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Netresearch\NrXliffStreaming\Parser;
 
+use Generator;
 use Netresearch\NrXliffStreaming\Exception\InvalidXliffException;
 
 /**
@@ -23,8 +24,8 @@ interface XliffParserInterface
      * Each unit contains id, source, target (optional), and line number.
      *
      * @param string $xmlContent XLIFF file content
-     * @return \Generator<array{id: string, source: string, target: string|null, line: int}>
+     * @return Generator<array{id: string, source: string, target: string|null, line: int}>
      * @throws InvalidXliffException if XML is malformed or invalid XLIFF structure
      */
-    public function parseTransUnits(string $xmlContent): \Generator;
+    public function parseTransUnits(string $xmlContent): Generator;
 }

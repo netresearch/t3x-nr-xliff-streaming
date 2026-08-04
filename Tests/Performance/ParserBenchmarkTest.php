@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Netresearch\NrXliffStreaming\Tests\Performance;
 
+use Generator;
 use Netresearch\NrXliffStreaming\Parser\XliffStreamingParser;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -126,7 +127,7 @@ final class ParserBenchmarkTest extends UnitTestCase
         $memoryBefore = memory_get_usage();
         $generator = $this->xliffStreamingParser->parseTransUnits($xliff);
 
-        self::assertInstanceOf(\Generator::class, $generator);
+        self::assertInstanceOf(Generator::class, $generator);
 
         // Iterate without converting to array (memory-efficient)
         $count = 0;

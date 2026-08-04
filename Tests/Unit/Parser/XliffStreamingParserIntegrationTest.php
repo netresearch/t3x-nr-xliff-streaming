@@ -89,6 +89,6 @@ final class XliffStreamingParserIntegrationTest extends UnitTestCase
         self::assertCount(1, $units2);
 
         // Verify different results
-        self::assertNotEquals($units1[0]['id'], $units2[0]['id']);
+        self::assertNotSame($units1[0]['id'], $units2[0]['id']);
     }
 }

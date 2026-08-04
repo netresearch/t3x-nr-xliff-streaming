@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Netresearch\NrXliffStreaming\Tests\Unit\Parser;
 
+use Generator;
 use Netresearch\NrXliffStreaming\Exception\InvalidXliffException;
 use Netresearch\NrXliffStreaming\Parser\XliffStreamingParser;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -310,7 +311,7 @@ XML;
 
         $generator = $this->xliffStreamingParser->parseTransUnits($xliff);
 
-        self::assertInstanceOf(\Generator::class, $generator, 'Method must return a Generator');
+        self::assertInstanceOf(Generator::class, $generator, 'Method must return a Generator');
 
         // Consume generator
         $count = 0;

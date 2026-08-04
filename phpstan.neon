@@ -12,3 +12,22 @@ parameters:
     bootstrapFiles:
         - .Build/vendor/autoload.php
     treatPhpDocTypesAsCertain: false
+
+    # netresearch/typo3-ci-workflows ships phpstan/extension-installer, which
+    # auto-registers ergebnis/phpstan-rules. Its default (allRules: true)
+    # forbids patterns TYPO3 requires — extending framework base classes such
+    # as UnitTestCase, nullable parameter types. The org baseline
+    # (config/phpstan/phpstan.neon in that package) disables allRules for the
+    # same reason; match it here.
+    ergebnis:
+        allRules: false
+
+    ignoreErrors:
+        # The parser declares `: Generator` and the tests assert it, so PHPStan
+        # can prove the assertion true. The assertions stay: they document the
+        # streaming contract at the point a reader looks for it, and PHPUnit
+        # requires at least one assertion per test. Scoped to Tests/ so the same
+        # tautology in production code still fails.
+        - identifier: staticMethod.alreadyNarrowedType
+          path: %currentWorkingDirectory%/Tests/*
+          reportUnmatched: false
