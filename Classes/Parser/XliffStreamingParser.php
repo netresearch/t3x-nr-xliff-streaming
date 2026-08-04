@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Netresearch\NrXliffStreaming\Parser;
 
+use Generator;
 use Netresearch\NrXliffStreaming\Exception\InvalidXliffException;
+use SimpleXMLElement;
+use XMLReader;
+
+use function is_string;
 
 /**
  * High-performance streaming XLIFF parser supporting XLIFF 1.0, 1.2, and 2.0
@@ -41,24 +46,26 @@ final class XliffStreamingParser implements XliffParserInterface
      * Speed: 60x faster than SimpleXML for large files (90 seconds vs 90 minutes)
      *
      * @param string $xmlContent XLIFF file content
-     * @return \Generator<array{id: string, source: string, target: string|null, line: int}>
+     * @return Generator<array{id: string, source: string, target: string|null, line: int}>
      * @throws InvalidXliffException if XML is malformed or invalid XLIFF structure
      */
-    public function parseTransUnits(string $xmlContent): \Generator
+    public function parseTransUnits(string $xmlContent): Generator
     {
-        $xmlReader = new \XMLReader();
+        // XMLReader::XML() is static as of PHP 8.0 and returns the reader it
+        // set up, so take it from the return value instead of calling it on a
+        // separately constructed instance.
+        $xmlReader = XMLReader::XML($xmlContent, 'UTF-8', LIBXML_NONET);
+
+        if (!$xmlReader instanceof XMLReader) {
+            throw new InvalidXliffException('Failed to parse XML content', 1700000001);
+        }
 
         try {
-            // Load XML content
-            if (!$xmlReader->XML($xmlContent, 'UTF-8', LIBXML_NONET)) {
-                throw new InvalidXliffException('Failed to parse XML content', 1700000001);
-            }
-
             // Stream through XML elements
             while ($xmlReader->read()) {
                 // Check for trans-unit elements (XLIFF 1.x) or unit elements (XLIFF 2.0)
                 if (
-                    $xmlReader->nodeType === \XMLReader::ELEMENT
+                    $xmlReader->nodeType === XMLReader::ELEMENT
                     && ($xmlReader->localName === 'trans-unit' || $xmlReader->localName === 'unit')
                     && $this->isXliffNamespace($xmlReader->namespaceURI)
                 ) {
@@ -82,10 +89,7 @@ final class XliffStreamingParser implements XliffParserInterface
         // XLIFF 1.0: no namespace (null or empty string)
         // XLIFF 1.2: urn:oasis:names:tc:xliff:document:1.2
         // XLIFF 2.0: urn:oasis:names:tc:xliff:document:2.0
-        return $uri === null
-            || $uri === ''
-            || $uri === self::XLIFF_1_2_NS
-            || $uri === self::XLIFF_2_0_NS;
+        return in_array($uri, [null, '', self::XLIFF_1_2_NS, self::XLIFF_2_0_NS], true);
     }
 
     /**
@@ -94,11 +98,11 @@ final class XliffStreamingParser implements XliffParserInterface
      * Converts XMLReader node to SimpleXMLElement for easy data extraction
      * with XXE protection (LIBXML_NONET flag).
      *
-     * @param \XMLReader $xmlReader XMLReader positioned at trans-unit element
+     * @param XMLReader $xmlReader XMLReader positioned at trans-unit element
      * @return array{id: string, source: string, target: string|null, line: int}
      * @throws InvalidXliffException if trans-unit structure is invalid
      */
-    private function extractTransUnit(\XMLReader $xmlReader): array
+    private function extractTransUnit(XMLReader $xmlReader): array
     {
         $expanded = $xmlReader->expand();
         if ($expanded === false) {
@@ -113,7 +117,7 @@ final class XliffStreamingParser implements XliffParserInterface
         // Read trans-unit as XML string
         // Note: readOuterXml() can return false in practice despite PHPDoc saying string
         $xml = $xmlReader->readOuterXml();
-        if (!\is_string($xml) || $xml === '') {
+        if (!is_string($xml) || $xml === '') {
             throw new InvalidXliffException(
                 sprintf('Failed to read trans-unit at line %d', $line),
                 1700000002
@@ -126,7 +130,7 @@ final class XliffStreamingParser implements XliffParserInterface
         try {
             $element = simplexml_load_string(
                 $xml,
-                \SimpleXMLElement::class,
+                SimpleXMLElement::class,
                 LIBXML_NONET
             );
         } finally {
