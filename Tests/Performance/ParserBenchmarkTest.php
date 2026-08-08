@@ -46,10 +46,10 @@ final class ParserBenchmarkTest extends UnitTestCase
         }
 
         $xliff = sprintf(
-            '<?xml version="1.0" encoding="UTF-8"?>' .
-            '<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">' .
-            '<file target-language="de" datatype="plaintext" original="messages">' .
-            '<body>%s</body></file></xliff>',
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">'
+            . '<file target-language="de" datatype="plaintext" original="messages">'
+            . '<body>%s</body></file></xliff>',
             implode("\n", $units)
         );
 
@@ -78,10 +78,10 @@ final class ParserBenchmarkTest extends UnitTestCase
         }
 
         $xliff = sprintf(
-            '<?xml version="1.0" encoding="UTF-8"?>' .
-            '<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">' .
-            '<file target-language="de" datatype="plaintext" original="messages">' .
-            '<body>%s</body></file></xliff>',
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">'
+            . '<file target-language="de" datatype="plaintext" original="messages">'
+            . '<body>%s</body></file></xliff>',
             implode("\n", $units)
         );
 
@@ -117,10 +117,10 @@ final class ParserBenchmarkTest extends UnitTestCase
         }
 
         $xliff = sprintf(
-            '<?xml version="1.0" encoding="UTF-8"?>' .
-            '<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">' .
-            '<file target-language="de" datatype="plaintext" original="messages">' .
-            '<body>%s</body></file></xliff>',
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">'
+            . '<file target-language="de" datatype="plaintext" original="messages">'
+            . '<body>%s</body></file></xliff>',
             implode("\n", $units)
         );
 

@@ -22,10 +22,10 @@ function generateXliffFile(string $outputPath, int $transUnitCount): void
         $target = sprintf('Dies ist Quelltext Nummer %d mit zusätzlichem Inhalt, um es realistisch zu machen. Lorem ipsum dolor sit amet, consectetur adipiscing elit.', $i);
 
         fwrite($file, sprintf(
-            '      <trans-unit id="%s">' . "\n" .
-            '        <source>%s</source>' . "\n" .
-            '        <target>%s</target>' . "\n" .
-            '      </trans-unit>' . "\n",
+            '      <trans-unit id="%s">' . "\n"
+            . '        <source>%s</source>' . "\n"
+            . '        <target>%s</target>' . "\n"
+            . '      </trans-unit>' . "\n",
             htmlspecialchars($id, ENT_XML1),
             htmlspecialchars($source, ENT_XML1),
             htmlspecialchars($target, ENT_XML1)
