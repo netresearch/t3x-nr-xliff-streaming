@@ -1,30 +1,36 @@
-<!-- Managed by agent: keep sections & order; edit content, not structure. Last updated: 2025-11-13 -->
+<!-- Managed by agent: keep sections & order; edit content, not structure. Last updated: 2026-08-19 -->
 
 # Tests/ — PHPUnit Testing Guidelines
 
 Unit and functional tests for XLIFF streaming parser.
 
-## 0. Skill Usage (Optional)
+## Skill Usage (Optional)
 
 **Optional skill for test infrastructure setup:**
 
 ```
 TYPO3 Testing Infrastructure:
-  Skill: Skill("netresearch-skills-bundle:typo3-testing")
+  Skill: typo3-testing
   When: Setting up new test infrastructure, configuring PHPUnit/CI
   Use: Create test configurations, manage fixtures, setup quality tooling
 
-  Covers: PHPUnit 11/12, TYPO3 v12/v13, dependency injection testing,
-          PHPStan level 10, Rector, php-cs-fixer integration
+  Covers: PHPUnit configuration, TYPO3 testing-framework, dependency
+          injection testing, PHPStan, Rector, php-cs-fixer integration
 ```
 
 **Not required for writing tests** - only invoke if setting up test infrastructure from scratch or major test framework migrations.
 
-## 1. Overview
+## Overview
 
 This directory contains comprehensive test coverage:
-- **Unit/Parser/XliffStreamingParserTest.php** - Functional tests (XLIFF 1.0, 1.2, 2.0)
+- **Unit/Parser/XliffStreamingParserTest.php** - Parser tests (XLIFF 1.0, 1.2, 2.0)
 - **Unit/Parser/XliffStreamingParserXXETest.php** - Security tests (XXE, DoS, SSRF)
+- **Unit/Parser/XliffStreamingParserEdgeCasesTest.php** - Edge case handling
+- **Unit/Parser/XliffStreamingParserIntegrationTest.php** - Fixture-based integration tests
+- **Performance/ParserBenchmarkTest.php** - Performance benchmarks
+- **Unit/Fixtures/** and **Fixtures/** - XLIFF sample files (valid, invalid, security)
+
+A functional suite is configured in `Build/phpunit/FunctionalTests.xml`, but `Tests/Functional/` is not yet populated.
 
 **Test Goals:**
 - 100% coverage of public methods
@@ -32,12 +38,12 @@ This directory contains comprehensive test coverage:
 - Performance characteristic verification
 - Edge case handling
 
-## 2. Setup & environment
+## Setup & environment
 
 ### Prerequisites
-- PHPUnit 11.0+
-- TYPO3 Testing Framework 8.0+
-- PHP 8.2, 8.3, or 8.4
+- PHPUnit 11 (`phpunit/phpunit` in `composer.json`)
+- TYPO3 testing-framework (pulled in via dev dependencies)
+- PHP version per `composer.json`
 
 ### Installation
 ```bash
@@ -50,12 +56,12 @@ ddev start
 ddev composer install
 ```
 
-## 3. Build & tests
+## Build & tests
 
 ### File-scoped commands (run from project root)
 ```bash
 # Run all unit tests
-composer test:unit
+composer ci:test:php:unit     # or: make test-unit
 
 # Run specific test file
 .Build/bin/phpunit -c Build/phpunit/UnitTests.xml Tests/Unit/Parser/XliffStreamingParserTest.php
@@ -67,10 +73,10 @@ composer test:unit
 .Build/bin/phpunit -c Build/phpunit/UnitTests.xml --coverage-html .Build/coverage
 
 # Run all tests (unit + functional)
-composer test
+make test
 ```
 
-## 4. Code style & conventions
+## Code style & conventions
 
 ### Test class structure
 ```php
@@ -141,7 +147,7 @@ public function testParse(): void
 public function testException(): void
 ```
 
-## 5. Security & safety
+## Security & safety
 
 ### Security test categories
 
@@ -219,7 +225,7 @@ XML;
 ### All security tests MUST pass
 No exceptions. These validate `LIBXML_NONET` protection.
 
-## 6. PR/commit checklist
+## PR/commit checklist
 
 Before committing tests:
 
@@ -232,10 +238,10 @@ Before committing tests:
 - [ ] Tests cover happy path, error cases, edge cases
 - [ ] Security tests included for XML parsing code
 - [ ] Test data uses heredoc syntax for readability
-- [ ] Run: `composer test:unit` - all tests pass
-- [ ] Run: `composer analyse` - no type errors in test code
+- [ ] Run: `composer ci:test:php:unit` - all tests pass
+- [ ] Run: `composer ci:test:php:phpstan` - no type errors in test code
 
-## 7. Good vs. bad examples
+## Good vs. bad examples
 
 ### ✅ Good: Testing generators
 ```php
@@ -330,7 +336,7 @@ self::assertStringNotContainsString(
 self::assertStringNotContainsString('root:', $units[0]['source']);
 ```
 
-## 8. When stuck
+## When stuck
 
 ### Resources
 1. **PHPUnit docs**: https://docs.phpunit.de/en/11.0/
@@ -346,8 +352,8 @@ self::assertStringNotContainsString('root:', $units[0]['source']);
 
 ### Debugging tests
 ```bash
-# Verbose output
-.Build/bin/phpunit -c Build/phpunit/UnitTests.xml --verbose
+# Readable per-test output
+.Build/bin/phpunit -c Build/phpunit/UnitTests.xml --testdox
 
 # Stop on failure
 .Build/bin/phpunit -c Build/phpunit/UnitTests.xml --stop-on-failure
@@ -356,7 +362,7 @@ self::assertStringNotContainsString('root:', $units[0]['source']);
 .Build/bin/phpunit -c Build/phpunit/UnitTests.xml --filter testName --debug
 ```
 
-## 9. House Rules
+## House Rules
 
 ### Coverage requirements
 - **100% coverage** of all public methods

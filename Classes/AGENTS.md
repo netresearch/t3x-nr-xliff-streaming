@@ -1,28 +1,28 @@
-<!-- Managed by agent: keep sections & order; edit content, not structure. Last updated: 2025-11-13 -->
+<!-- Managed by agent: keep sections & order; edit content, not structure. Last updated: 2026-08-19 -->
 
 # Classes/ — PHP Backend Code
 
 High-performance XLIFF streaming parser implementation.
 
-## 0. Skill Usage (Optional)
+## Skill Usage (Optional)
 
 **Optional skills for enhanced code quality:**
 
 ```
 TYPO3 Conformance Audits:
-  Skill: Skill("netresearch-skills-bundle:typo3-conformance")
+  Skill: typo3-conformance
   When: Auditing extension quality, generating conformance reports
-  Use: Evaluate adherence to TYPO3 12/13 standards, identify technical debt
+  Use: Evaluate adherence to TYPO3 standards, identify technical debt
 
 TYPO3 Testing Setup:
-  Skill: Skill("netresearch-skills-bundle:typo3-testing")
+  Skill: typo3-testing
   When: Setting up test infrastructure, configuring PHPUnit
   Use: Create test configurations, manage fixtures, setup CI/CD
 ```
 
 **Not required for normal development** - only invoke if performing comprehensive audits or test infrastructure setup.
 
-## 1. Overview
+## Overview
 
 This directory contains the core parser logic and exception handling:
 - **Parser/XliffStreamingParser.php** - XMLReader-based streaming parser with Generator pattern
@@ -34,11 +34,10 @@ This directory contains the core parser logic and exception handling:
 - XXE attack protection (CWE-611)
 - XLIFF 1.0, 1.2, 2.0 support
 
-## 2. Setup & environment
+## Setup & environment
 
 ### Prerequisites
-- PHP 8.2, 8.3, or 8.4
-- TYPO3 13.4+
+- PHP and TYPO3 versions per `composer.json` (authoritative)
 - XMLReader extension (bundled with PHP)
 
 ### Installation
@@ -52,24 +51,27 @@ ddev start  # Auto-runs composer install
 ddev ssh    # Enter container
 ```
 
-## 3. Build & tests
+## Build & tests
 
 ### File-scoped commands (run from project root)
 ```bash
-# Syntax check
-composer lint
+# Code style check (dry-run)
+composer ci:test:php:cgl      # or: make cgl
 
 # Auto-fix code style
-composer fix
+composer ci:cgl               # or: make cgl-fix
 
-# Static analysis
-composer analyse
+# Static analysis (PHPStan, level max)
+composer ci:test:php:phpstan  # or: make phpstan
 
-# Run tests
-composer test:unit
+# Rector dry-run
+composer ci:test:php:rector   # or: make rector
+
+# Run unit tests
+composer ci:test:php:unit     # or: make test-unit
 ```
 
-## 4. Code style & conventions
+## Code style & conventions
 
 ### Mandatory patterns
 ```php
@@ -112,7 +114,7 @@ throw new InvalidXliffException(
 );
 ```
 
-## 5. Security & safety
+## Security & safety
 
 ### XML parsing MUST use LIBXML_NONET
 ```php
@@ -141,7 +143,7 @@ $reader->XML($xmlContent);
 - Include line numbers in error messages for debugging
 - Fail fast with specific error codes
 
-## 6. PR/commit checklist
+## PR/commit checklist
 
 Before committing code in Classes/:
 
@@ -153,9 +155,9 @@ Before committing code in Classes/:
 - [ ] Constants use `private const` with UPPERCASE
 - [ ] XML parsing uses `LIBXML_NONET` flag
 - [ ] Exception handling with specific error codes (1700000001-1700000005)
-- [ ] Run: `composer lint && composer fix && composer analyse && composer test`
+- [ ] Run: `composer ci:test:php:cgl && composer ci:test:php:phpstan && composer ci:test:php:unit`
 
-## 7. Good vs. bad examples
+## Good vs. bad examples
 
 ### ✅ Good: Generator pattern with constant memory
 ```php
@@ -218,7 +220,7 @@ throw new InvalidXliffException(
 throw new \Exception('Invalid XLIFF');  // No context, no code
 ```
 
-## 8. When stuck
+## When stuck
 
 ### Resources
 1. **Serena memories**: `list_memories()` - project_overview, code_style_conventions
@@ -230,7 +232,7 @@ throw new \Exception('Invalid XLIFF');  // No context, no code
 - **Memory issues**: Ensure Generator pattern is used, not loading full file
 - **XXE vulnerabilities**: Always use `LIBXML_NONET` flag
 - **Type errors**: Add strict type hints everywhere
-- **Style violations**: Run `composer fix` to auto-correct
+- **Style violations**: Run `composer ci:cgl` to auto-correct
 
 ### Error code ranges
 - `1700000001`: XML parsing failure
@@ -239,7 +241,7 @@ throw new \Exception('Invalid XLIFF');  // No context, no code
 - `1700000004`: Missing required id attribute
 - `1700000005`: Missing required source element
 
-## 9. House Rules
+## House Rules
 
 ### Performance requirements
 - Memory usage MUST remain constant (~30MB) regardless of file size
