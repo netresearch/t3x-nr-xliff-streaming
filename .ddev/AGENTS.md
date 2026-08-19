@@ -1,34 +1,34 @@
-<!-- Managed by agent: keep sections & order; edit content, not structure. Last updated: 2025-11-13 -->
+<!-- Managed by agent: keep sections & order; edit content, not structure. Last updated: 2026-08-19 -->
 
 # .ddev/ — DDEV Development Environment
 
 DDEV local development environment configuration for TYPO3 extension.
 
-## 0. Skill Usage (DDEV Environment)
+## Skill Usage (DDEV Environment)
 
 **ALWAYS invoke the typo3-ddev skill when working with DDEV configuration:**
 
 ```
 When to invoke: Setting up DDEV, modifying config.yaml, environment issues
-Command: Skill("netresearch-skills-bundle:typo3-ddev")
+Skill: typo3-ddev
 Purpose: Automate DDEV environment setup for TYPO3 extension development
 ```
 
 **The skill provides:**
 - ✅ DDEV configuration for TYPO3 extensions
-- ✅ Multi-version TYPO3 testing environments (v12/v13)
+- ✅ Multi-version TYPO3 testing environments
 - ✅ PHP version management (8.2, 8.3, 8.4)
 - ✅ Database setup (MariaDB/MySQL)
 - ✅ Development workflow optimization
 - ✅ Troubleshooting DDEV issues
 
 **Workflow pattern:**
-1. Invoke typo3-ddev skill (`Skill("netresearch-skills-bundle:typo3-ddev")`)
+1. Invoke the typo3-ddev skill
 2. Follow skill guidance for DDEV setup/configuration
 3. Test environment with `ddev start && ddev composer install`
 4. Verify extension functionality in DDEV context
 
-## 1. Overview
+## Overview
 
 This directory contains DDEV configuration for local development:
 - **config.yaml** - Main DDEV configuration
@@ -44,7 +44,7 @@ This directory contains DDEV configuration for local development:
 - Quick start for new developers
 - TYPO3 extension testing
 
-## 2. Setup & environment
+## Setup & environment
 
 ### Prerequisites
 - DDEV installed (https://ddev.readthedocs.io/)
@@ -84,7 +84,7 @@ hooks:
     - exec: composer install
 ```
 
-## 3. Build & tests
+## Build & tests
 
 ### File-scoped commands (run from project root)
 ```bash
@@ -100,14 +100,15 @@ ddev restart
 # Run composer commands
 ddev composer install
 ddev composer update
-ddev composer test
-ddev composer lint
-ddev composer fix
-ddev composer analyse
+
+# Quality checks in DDEV
+ddev composer ci:test:php:cgl
+ddev composer ci:cgl
+ddev composer ci:test:php:phpstan
 
 # Run tests in DDEV
-ddev composer test:unit
-ddev composer test:functional
+ddev composer ci:test:php:unit
+ddev composer ci:test:php:functional
 
 # SSH into container
 ddev ssh
@@ -119,7 +120,7 @@ ddev logs
 ddev describe
 ```
 
-## 4. Code style & conventions
+## Code style & conventions
 
 ### config.yaml structure
 ```yaml
@@ -154,7 +155,7 @@ hooks:
 - **Hooks**: Automate setup tasks (composer install, migrations, etc.)
 - **No secrets**: Never commit credentials or API keys in config.yaml
 
-## 5. Security & safety
+## Security & safety
 
 ### DDEV security practices
 - **Never commit `.ddev/config.local.yaml`** - May contain local credentials
@@ -177,7 +178,7 @@ ddev export-db --gzip=false > dump.sql
 # Review before committing
 ```
 
-## 6. PR/commit checklist
+## PR/commit checklist
 
 Before committing DDEV configuration:
 
@@ -191,7 +192,7 @@ Before committing DDEV configuration:
 ### Testing
 - [ ] Run `ddev start` - environment starts successfully
 - [ ] Run `ddev composer install` - dependencies install
-- [ ] Run `ddev composer test` - tests pass in DDEV
+- [ ] Run `ddev composer ci:test:php:unit` - tests pass in DDEV
 - [ ] Verify web access to TYPO3 (if applicable)
 
 ### Gitignore
@@ -205,7 +206,7 @@ Before committing DDEV configuration:
 - [ ] Any custom commands documented
 - [ ] Team members can replicate environment
 
-## 7. Good vs. bad examples
+## Good vs. bad examples
 
 ### ✅ Good: Complete config.yaml
 ```yaml
@@ -280,11 +281,11 @@ hooks:
 # Developers must remember to run composer install
 ```
 
-## 8. When stuck
+## When stuck
 
 ### Invoke typo3-ddev skill FIRST
 ```
-Skill("netresearch-skills-bundle:typo3-ddev")
+Invoke the typo3-ddev skill.
 ```
 The skill provides comprehensive DDEV setup and troubleshooting guidance.
 
@@ -355,17 +356,17 @@ ddev xdebug off
 xdebug_enabled: true
 ```
 
-## 9. House Rules
+## House Rules
 
 ### PHP Version Strategy
-- **Default**: 8.2 (current stable for TYPO3 13)
+- **Default**: 8.2 (see `.ddev/config.yaml`; keep within the `composer.json` PHP range)
 - **Testing**: Use `ddev config --php-version=X.Y` to test multiple versions
 - **Match composer.json**: PHP version must be within composer requirements
 - **Team consistency**: All developers use same PHP version by default
 
 ### Database Standards
 - **Use MariaDB** for TYPO3 (better compatibility than MySQL)
-- **Version 10.11** (TYPO3 13 compatible)
+- **Version 10.11** (matches `.ddev/config.yaml`)
 - **Don't commit dumps** with sensitive data
 - **Use snapshots** for testing (`ddev snapshot`)
 
@@ -396,7 +397,7 @@ web_environment:
 ```
 
 ### Multi-Version Testing
-For TYPO3 extensions supporting v12 and v13:
+For testing against multiple TYPO3 versions:
 1. Create snapshots for each version
 2. Use `ddev config --php-version=X.Y` to switch
 3. Document test matrix in README.md
@@ -418,7 +419,7 @@ New team members should:
 1. Install DDEV (https://ddev.readthedocs.io/en/stable/users/install/)
 2. Clone repository
 3. Run `ddev start` (auto-installs dependencies)
-4. Run `ddev composer test` to verify setup
+4. Run `ddev composer ci:test:php:unit` to verify setup
 5. Access https://nr-xliff-streaming.ddev.site (if web interface exists)
 
 **First-time setup should take < 5 minutes.**

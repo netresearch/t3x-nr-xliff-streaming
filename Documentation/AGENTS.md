@@ -1,34 +1,34 @@
-<!-- Managed by agent: keep sections & order; edit content, not structure. Last updated: 2025-11-13 -->
+<!-- Managed by agent: keep sections & order; edit content, not structure. Last updated: 2026-08-19 -->
 
 # Documentation/ — RST Documentation
 
 TYPO3 extension documentation in reStructuredText (RST) format.
 
-## 0. Skill Usage (TYPO3 Documentation)
+## Skill Usage (TYPO3 Documentation)
 
 **ALWAYS invoke the typo3-docs skill when working in this directory:**
 
 ```
 When to invoke: Before editing any *.rst files, guides.xml, or README.md
-Command: Skill("netresearch-skills-bundle:typo3-docs")
+Skill: typo3-docs
 Purpose: Loads TYPO3-specific directives, validation tools, and modern standards
 ```
 
 **The skill provides:**
 - ✅ TYPO3-specific directives (confval, versionadded, card-grid, php:method)
 - ✅ Modern standards (guides.xml over Settings.cfg, card-grid navigation)
-- ✅ Validation scripts (validate_docs.sh, render_docs.sh)
+- ✅ Validation and local rendering guidance
 - ✅ Documentation synchronization rules (README.md ↔ Documentation/)
 - ✅ Intercept deployment guidance (automatic publishing to docs.typo3.org)
 
 **Workflow pattern:**
-1. Invoke typo3-docs skill (`Skill("netresearch-skills-bundle:typo3-docs")`)
+1. Invoke the typo3-docs skill
 2. Follow skill guidance for TYPO3-specific features
-3. Validate: `scripts/validate_docs.sh` or render locally
+3. Render locally: `composer doc-make`
 4. Ensure README.md and Documentation/ stay synchronized
 5. Commit both together in atomic commits
 
-## 1. Overview
+## Overview
 
 This directory contains user-facing documentation for the extension:
 - **Index.rst** - Main documentation index (use card-grid navigation)
@@ -46,7 +46,7 @@ This directory contains user-facing documentation for the extension:
 - API reference for developers
 - Performance and security information
 
-**Modern TYPO3 13.x Standards:**
+**Modern TYPO3 documentation standards:**
 - ✅ Use `guides.xml` (modern PHP-based rendering)
 - ✅ Use `confval` directive for ALL configuration (mandatory)
 - ✅ Use `card-grid` navigation in Index.rst (modern default)
@@ -55,42 +55,32 @@ This directory contains user-facing documentation for the extension:
 - ❌ Don't use Settings.cfg (legacy Sphinx - migrate to guides.xml)
 - ❌ Don't use plain text for configuration (must use confval)
 
-## 2. Setup & environment
+## Setup & environment
 
 ### Prerequisites
 - Basic understanding of reStructuredText (RST) syntax
 - Text editor with RST support (VS Code + extension recommended)
 - **TYPO3 docs skill** for modern TYPO3-specific directives
 
-### Validation & Rendering Scripts
+### Validation & Rendering
 
-**Validate documentation:**
+**Render locally (Docker-based TYPO3 render-guides):**
 ```bash
-# If scripts/validate_docs.sh exists (recommended)
-scripts/validate_docs.sh
+composer doc-make
 
-# Otherwise use manual validation
-# - Check RST syntax with VS Code extension
-# - Verify guides.xml structure
-# - Check for broken cross-references
-```
-
-**Render locally:**
-```bash
-# If scripts/render_docs.sh exists (recommended)
-scripts/render_docs.sh
-
-# Otherwise use TYPO3 renderer manually
-composer global require t3docs/render-guides
-render-guides Documentation/
+# Live-reload rendering on port 8000
+composer doc-watch
 ```
 
 **View rendered output:**
 ```bash
-open Documentation-GENERATED-temp/Index.html
-# or
 xdg-open Documentation-GENERATED-temp/Index.html
 ```
+
+**Manual validation:**
+- Check RST syntax with VS Code extension
+- Verify guides.xml structure
+- Check for broken cross-references in the render output
 
 ### Official rendering
 Documentation is automatically rendered at:
@@ -102,26 +92,20 @@ https://docs.typo3.org/p/netresearch/nr-xliff-streaming/main/en-us/
 - First build requires manual approval (1-3 business days)
 - See typo3-docs skill for complete deployment guide
 
-## 3. Build & tests
+## Build & tests
 
 ### File-scoped commands (run from project root)
 ```bash
-# Validate RST syntax (if script available)
-scripts/validate_docs.sh
+# Render documentation locally (Docker required)
+composer doc-make
 
-# Render documentation locally (if script available)
-scripts/render_docs.sh
-
-# Validate and render in one step
-scripts/validate_docs.sh && scripts/render_docs.sh
-
-# Lint project (basic syntax check)
-composer lint
+# Render with live-reload watcher on port 8000
+composer doc-watch
 ```
 
 **ALWAYS validate and render locally before committing!**
 
-## 4. Code style & conventions
+## Code style & conventions
 
 ### RST file structure
 ```rst
@@ -288,7 +272,7 @@ Sub-subsection Title
    This is a helpful tip for better usage.
 ```
 
-## 5. Security & safety
+## Security & safety
 
 ### Security documentation requirements
 - **Always document security features** (XXE protection, DoS prevention)
@@ -345,7 +329,7 @@ editor.ui.componentFactory.add('insertimage', ...)  # Correct!
 
 **Fix:** Update both README.md AND Documentation/ with correct value from code.
 
-## 6. PR/commit checklist
+## PR/commit checklist
 
 Before committing documentation:
 
@@ -366,8 +350,7 @@ Before committing documentation:
 - [ ] guides.xml exists (not Settings.cfg)
 
 ### Validation & Synchronization
-- [ ] Run: `scripts/validate_docs.sh` (if available)
-- [ ] Run: `scripts/render_docs.sh` - verify no warnings
+- [ ] Run: `composer doc-make` - verify no warnings
 - [ ] Verify README.md matches Documentation/ content
 - [ ] Code examples match Classes/ implementation
 - [ ] guides.xml includes all new RST files
@@ -379,7 +362,7 @@ Before committing documentation:
 - [ ] Render locally and check for warnings
 - [ ] Commit README.md and Documentation/ together
 
-## 7. Good vs. bad examples
+## Good vs. bad examples
 
 ### ✅ Good: confval directive (MANDATORY)
 ```rst
@@ -491,7 +474,7 @@ Installation
 Prerequisites
 -------------
 
-- TYPO3 13.4+
+- TYPO3 and PHP versions per `composer.json`
 - PHP 8.2, 8.3, or 8.4
 
 Composer Installation
@@ -538,11 +521,11 @@ Performance: 1MB file uses 8MB with SimpleXML but only 30MB streaming.
 10MB file uses 80MB vs 30MB. 100MB file uses 800MB vs 30MB.
 ```
 
-## 8. When stuck
+## When stuck
 
 ### Invoke typo3-docs skill FIRST
 ```
-Skill("netresearch-skills-bundle:typo3-docs")
+Invoke the typo3-docs skill.
 ```
 The skill provides comprehensive guidance for all TYPO3-specific documentation needs.
 
@@ -573,9 +556,9 @@ The skill provides comprehensive guidance for all TYPO3-specific documentation n
 :php:`ClassName` (domain role)
 ```
 
-## 9. House Rules
+## House Rules
 
-### Modern TYPO3 13.x Standards (NON-NEGOTIABLE)
+### Modern TYPO3 Documentation Standards (NON-NEGOTIABLE)
 
 **1. guides.xml (REQUIRED - Modern PHP-Based)**
 ```xml
@@ -683,8 +666,7 @@ Documentation/
 - Review documentation with every major release
 
 ### Validation is MANDATORY
-- Run `scripts/validate_docs.sh` before committing
-- Render locally with `scripts/render_docs.sh`
+- Render locally with `composer doc-make` before committing
 - Check for rendering warnings
 - Verify README.md synchronization
 - No broken cross-references
