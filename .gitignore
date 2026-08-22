@@ -16,6 +16,7 @@ Thumbs.db
 # TYPO3
 /typo3/
 /typo3conf/ext/
+/var/
 
 # Quality tools
 /.php-cs-fixer.cache
