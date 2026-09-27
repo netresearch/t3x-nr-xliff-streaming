@@ -1,7 +1,7 @@
 {
     "name": "netresearch/nr-xliff-streaming",
     "type": "typo3-cms-extension",
-    "description": "High-performance streaming XLIFF parser for TYPO3 supporting large translation files (10MB+) with constant memory footprint",
+    "description": "XLIFF Streaming Parser - High-performance streaming XLIFF parser for TYPO3 supporting large translation files (10MB+) with constant memory footprint",
     "keywords": [
         "TYPO3",
         "extension",

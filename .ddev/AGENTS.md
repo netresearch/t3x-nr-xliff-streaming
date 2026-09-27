@@ -252,6 +252,10 @@ php_version: "8.2"
 # Switch to PHP 8.4
 # ddev config --php-version=8.4
 # ddev restart
+
+# Switch to PHP 8.5
+# ddev config --php-version=8.5
+# ddev restart
 ```
 
 ### ❌ Bad: Hardcoded secrets
