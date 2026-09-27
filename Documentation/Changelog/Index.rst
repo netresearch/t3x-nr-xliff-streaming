@@ -27,8 +27,8 @@ Initial Release
 * Comprehensive XXE attack protection (CWE-611)
 * Billion Laughs DoS attack mitigation
 * Full dependency injection support
-* TYPO3 13.4 compatibility
-* PHP 8.2, 8.3, and 8.4 support
+* TYPO3 13.4 LTS and 14.3 LTS compatibility
+* PHP 8.2, 8.3, 8.4, and 8.5 support
 * Complete RST documentation with performance and security sections
 * 17 unit tests with security test coverage
 * PHPStan level 9 static analysis

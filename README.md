@@ -3,6 +3,7 @@
 High-performance streaming XLIFF parser for TYPO3 supporting large translation files (10MB+) with constant memory footprint.
 
 [![TYPO3 13](https://img.shields.io/badge/TYPO3-13-orange.svg)](https://get.typo3.org/version/13)
+[![TYPO3 14](https://img.shields.io/badge/TYPO3-14-orange.svg)](https://get.typo3.org/version/14)
 [![PHP 8.2+](https://img.shields.io/badge/PHP-8.2+-blue.svg)](https://www.php.net/)
 [![License](https://img.shields.io/badge/license-GPL--2.0--or--later-blue.svg)](LICENSE)
 
@@ -89,8 +90,8 @@ All XML parsing uses `LIBXML_NONET` flag to prevent network access during parsin
 
 ## Requirements
 
-- TYPO3 13.4+
-- PHP 8.2, 8.3, or 8.4
+- TYPO3 13.4 LTS or 14.3 LTS
+- PHP 8.2, 8.3, 8.4, or 8.5
 
 ## Development
 

@@ -22,16 +22,16 @@ Composer Install Fails
 
    .. code-block:: bash
 
-      php -v  # Must be 8.2, 8.3, or 8.4
+      php -v  # Must be 8.2, 8.3, 8.4, or 8.5
 
 2. **Check TYPO3 version**:
 
-   Requires TYPO3 13.4 or higher. Update ``composer.json``:
+   Requires TYPO3 13.4 LTS or 14.3 LTS. Update ``composer.json``:
 
    .. code-block:: json
 
       "require": {
-          "typo3/cms-core": "^13.4"
+          "typo3/cms-core": "^13.4 || ^14.3"
       }
 
 3. **Clear composer cache**:

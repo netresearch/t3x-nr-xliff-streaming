@@ -103,6 +103,6 @@ When to Use This Extension
 Requirements
 ============
 
-- TYPO3 13.4 or higher
-- PHP 8.2, 8.3, or 8.4
+- TYPO3 13.4 LTS or 14.3 LTS
+- PHP 8.2, 8.3, 8.4, or 8.5
 - XMLReader PHP extension (standard, typically enabled)
