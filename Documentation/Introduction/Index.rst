@@ -77,7 +77,7 @@ Key Features
    Memory-efficient iteration using PHP generators
 
 ✅ **Dependency Injection**
-   Modern TYPO3 13.x architecture with Services.yaml configuration
+   TYPO3 13.4 LTS and 14.3 LTS architecture with Services.yaml configuration
 
 ✅ **Drop-in Replacement**
    Easy migration from SimpleXML to streaming parser

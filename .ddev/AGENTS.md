@@ -17,7 +17,7 @@ Purpose: Automate DDEV environment setup for TYPO3 extension development
 **The skill provides:**
 - ✅ DDEV configuration for TYPO3 extensions
 - ✅ Multi-version TYPO3 testing environments
-- ✅ PHP version management (8.2, 8.3, 8.4)
+- ✅ PHP version management (8.2, 8.3, 8.4, 8.5)
 - ✅ Database setup (MariaDB/MySQL)
 - ✅ Development workflow optimization
 - ✅ Troubleshooting DDEV issues
@@ -130,7 +130,7 @@ type: typo3              # Project type (typo3, php, etc.)
 docroot: .Build/web      # TYPO3 web root
 
 # PHP configuration
-php_version: "8.2"       # PHP version (8.2, 8.3, 8.4)
+php_version: "8.2"       # PHP version (8.2, 8.3, 8.4, 8.5)
 webserver_type: apache-fpm  # Web server type
 
 # Database configuration

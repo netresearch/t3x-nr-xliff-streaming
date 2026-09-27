@@ -14,7 +14,7 @@ Agent-facing component map for `nr_xliff_streaming`. For user-facing documentati
 | Streaming parser | `Classes/Parser/XliffStreamingParser.php` | `final` implementation using `XMLReader::XML(..., LIBXML_NONET)`; yields `array{id, source, target, line}` per trans-unit |
 | Exception | `Classes/Exception/InvalidXliffException.php` | `final`, extends `RuntimeException`; error codes 1700000001-1700000005 |
 | DI wiring | `Configuration/Services.yaml` | Autowire/autoconfigure for `Netresearch\NrXliffStreaming\`; `XliffStreamingParser` is `public: true` |
-| Extension config | `ext_conf_template.txt`, `ext_emconf.php` | Extension settings and metadata (version lives in `ext_emconf.php`) |
+| Extension config | `ext_conf_template.txt`, `ext_emconf.php` | Extension settings and metadata (version lives in `ext_emconf.php` and in `composer.json` `extra.typo3/cms.version`; keep both equal) |
 | Test suites | `Tests/Unit/`, `Tests/Performance/` | PHPUnit unit tests (parser, XXE/security, edge cases, fixture-based integration) and benchmarks |
 | Test configs | `Build/phpunit/UnitTests.xml`, `Build/phpunit/FunctionalTests.xml` | PHPUnit configurations (functional suite configured; `Tests/Functional/` not yet populated) |
 | Test fixtures | `Tests/Unit/Fixtures/`, `Tests/Fixtures/` | Valid/invalid/security XLIFF samples |
