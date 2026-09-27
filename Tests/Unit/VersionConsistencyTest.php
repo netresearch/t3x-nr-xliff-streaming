@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Netresearch\NrXliffStreaming\Tests\Unit;
 
+use Composer\Semver\Intervals;
+use Composer\Semver\VersionParser;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Test;
+use Symfony\Component\Yaml\Yaml;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
@@ -22,7 +25,14 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
  * The supported TYPO3 and PHP ranges are stated three times as well: in
  * composer.json, in ext_emconf.php and in the CI matrix. This repository has
  * no support-matrix page to check them against, so the test pins the three
- * sources against each other, with the CI matrix as the set actually tested.
+ * sources against each other. The CI side is the set of versions that at
+ * least one matrix cell tests: every php-versions x typo3-versions pair of
+ * each job in ci.yml, minus the pairs its matrix-exclude removes.
+ *
+ * Each source is read the way its consumer reads it: ext_emconf.php is
+ * included with $_EXTKEY set, as TYPO3's PackageManager does, ci.yml is
+ * parsed as YAML and its matrix inputs as JSON, as GitHub Actions does, and
+ * composer constraints are compared as version intervals, as composer does.
  */
 #[CoversNothing]
 final class VersionConsistencyTest extends UnitTestCase
@@ -32,90 +42,217 @@ final class VersionConsistencyTest extends UnitTestCase
         return dirname(__DIR__, 2);
     }
 
-    private function readRepoFile(string $path): string
-    {
-        $contents = file_get_contents($this->repoRoot() . '/' . $path);
-        self::assertIsString($contents, $path . ' must be readable');
-
-        return $contents;
-    }
-
     /**
      * @return array<mixed>
      */
     private function composerJson(): array
     {
-        $composer = json_decode($this->readRepoFile('composer.json'), true);
+        $contents = file_get_contents($this->repoRoot() . '/composer.json');
+        self::assertIsString($contents, 'composer.json must be readable');
+        $composer = json_decode($contents, true);
         self::assertIsArray($composer, 'composer.json must decode to an object');
 
         return $composer;
     }
 
-    private function extEmConfValue(string $key): string
+    /**
+     * @return array<mixed>
+     */
+    private function composerTypo3Extra(): array
     {
-        self::assertSame(
-            1,
-            preg_match("/'" . preg_quote($key, '/') . "'\\s*=>\\s*'([^']+)'/", $this->readRepoFile('ext_emconf.php'), $matches),
-            'ext_emconf.php must declare exactly one readable "' . $key . '" value',
-        );
+        $extra = $this->composerJson()['extra'] ?? null;
+        self::assertIsArray($extra);
+        $typo3Cms = $extra['typo3/cms'] ?? null;
+        self::assertIsArray($typo3Cms, 'composer.json must carry extra.typo3/cms');
 
-        return $matches[1];
+        return $typo3Cms;
+    }
+
+    private function composerRequire(string $package): string
+    {
+        $require = $this->composerJson()['require'] ?? null;
+        self::assertIsArray($require);
+        $constraint = $require[$package] ?? null;
+        self::assertIsString($constraint, 'composer.json must require ' . $package);
+
+        return $constraint;
     }
 
     /**
-     * The union of one matrix key over every call in ci.yml, lowest first,
-     * with a leading caret removed.
+     * The array ext_emconf.php assigns to $EM_CONF[$_EXTKEY], obtained the way
+     * PackageManager::getExtensionEmConf() obtains it: by including the file
+     * with $_EXTKEY set. Comments, duplicate keys and expressions resolve as
+     * PHP resolves them.
      *
-     * @return non-empty-list<string>
+     * @return array<mixed>
      */
-    private function ciMatrix(string $key): array
+    private function extEmConf(): array
     {
-        preg_match_all(
-            '/^\s*' . preg_quote($key, '/') . ":\\s*'([^']+)'/m",
-            $this->readRepoFile('.github/workflows/ci.yml'),
-            $matches,
-        );
-        self::assertNotSame([], $matches[1], '.github/workflows/ci.yml must set ' . $key);
+        $extensionKey = $this->composerTypo3Extra()['extension-key'] ?? null;
+        self::assertIsString($extensionKey, 'composer.json must declare extra.typo3/cms.extension-key');
 
-        $versions = [];
-        foreach ($matches[1] as $json) {
-            $decoded = json_decode($json, true);
-            self::assertIsArray($decoded, $key . ' in ci.yml must be a JSON array');
-            foreach ($decoded as $version) {
-                self::assertIsString($version);
-                $versions[] = ltrim($version, '^');
+        $include = static function (string $path, string $_EXTKEY): mixed {
+            $EM_CONF = null;
+            include $path;
+            // Read back through get_defined_vars(): static analysis cannot see
+            // that the include assigns $EM_CONF, and would take it as null.
+            $emConf = get_defined_vars()['EM_CONF'] ?? null;
+
+            return is_array($emConf) ? ($emConf[$_EXTKEY] ?? null) : null;
+        };
+        $emConf = $include($this->repoRoot() . '/ext_emconf.php', $extensionKey);
+        self::assertIsArray($emConf, 'ext_emconf.php must assign an array to $EM_CONF[$_EXTKEY]');
+
+        return $emConf;
+    }
+
+    private function extEmConfVersion(): string
+    {
+        $version = $this->extEmConf()['version'] ?? null;
+        self::assertIsString($version, 'ext_emconf.php must declare a version');
+
+        return $version;
+    }
+
+    private function extEmConfDepends(string $key): string
+    {
+        $constraints = $this->extEmConf()['constraints'] ?? null;
+        self::assertIsArray($constraints);
+        $depends = $constraints['depends'] ?? null;
+        self::assertIsArray($depends);
+        $value = $depends[$key] ?? null;
+        self::assertIsString($value, 'ext_emconf.php must declare a ' . $key . ' dependency');
+
+        return $value;
+    }
+
+    /**
+     * The values of one matrix axis ("php" or "typo3") that at least one
+     * non-excluded cell tests, over every job in ci.yml that sets both axes.
+     * An exclude entry removes every cell whose values match all its keys,
+     * as GitHub Actions applies `strategy.matrix.exclude`.
+     *
+     * @return non-empty-list<string> natural order, lowest first
+     */
+    private function ciTested(string $axis): array
+    {
+        $workflow = Yaml::parseFile($this->repoRoot() . '/.github/workflows/ci.yml');
+        self::assertIsArray($workflow);
+        $jobs = $workflow['jobs'] ?? null;
+        self::assertIsArray($jobs, 'ci.yml must define jobs');
+
+        $tested = [];
+        $matrixJobs = 0;
+        foreach ($jobs as $job) {
+            $with = is_array($job) ? ($job['with'] ?? null) : null;
+            if (!is_array($with) || !isset($with['php-versions'], $with['typo3-versions'])) {
+                continue;
+            }
+
+            ++$matrixJobs;
+            $axes = [
+                'php' => $this->stringList($with['php-versions'], 'php-versions'),
+                'typo3' => $this->stringList($with['typo3-versions'], 'typo3-versions'),
+            ];
+            $excludes = isset($with['matrix-exclude'])
+                ? $this->jsonList($with['matrix-exclude'], 'matrix-exclude')
+                : [];
+
+            foreach ($axes['php'] as $php) {
+                foreach ($axes['typo3'] as $typo3) {
+                    $cell = ['php' => $php, 'typo3' => $typo3];
+                    if (!$this->isExcluded($cell, $excludes)) {
+                        $tested[] = $cell[$axis];
+                    }
+                }
             }
         }
 
-        $versions = array_values(array_unique($versions));
-        sort($versions, SORT_NATURAL);
-        self::assertNotSame([], $versions);
+        self::assertGreaterThan(0, $matrixJobs, 'ci.yml must have a job that sets php-versions and typo3-versions');
+        self::assertNotSame([], $tested, 'matrix-exclude removes every cell of the CI matrix');
 
-        return $versions;
+        $tested = array_values(array_unique($tested));
+        sort($tested, SORT_NATURAL);
+
+        return $tested;
     }
 
     /**
-     * ext_emconf.php range spanning the given matrix: lowest.0 to highest.99.
-     *
-     * @param non-empty-list<string> $matrix
+     * @return list<string>
      */
-    private function emConfRangeFor(array $matrix): string
+    private function stringList(mixed $json, string $input): array
     {
-        return $matrix[0] . '.0-' . $matrix[count($matrix) - 1] . '.99';
+        $values = [];
+        foreach ($this->jsonList($json, $input) as $value) {
+            self::assertIsString($value, $input . ' in ci.yml must list strings');
+            $values[] = $value;
+        }
+
+        return $values;
+    }
+
+    /**
+     * @return list<mixed>
+     */
+    private function jsonList(mixed $json, string $input): array
+    {
+        self::assertIsString($json, $input . ' in ci.yml must be a JSON string');
+        $decoded = json_decode($json, true);
+        self::assertIsArray($decoded, $input . ' in ci.yml must decode to a JSON array');
+        self::assertTrue(array_is_list($decoded), $input . ' in ci.yml must decode to a JSON array');
+
+        return $decoded;
+    }
+
+    /**
+     * @param array{php: mixed, typo3: mixed} $cell
+     * @param list<mixed> $excludes
+     */
+    private function isExcluded(array $cell, array $excludes): bool
+    {
+        foreach ($excludes as $exclude) {
+            self::assertIsArray($exclude, 'matrix-exclude entries must be objects');
+            $matches = true;
+            foreach ($exclude as $key => $value) {
+                if (!array_key_exists($key, $cell) || $cell[$key] !== $value) {
+                    $matches = false;
+                    break;
+                }
+            }
+
+            if ($matches && $exclude !== []) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function sameConstraint(string $a, string $b): bool
+    {
+        $versionParser = new VersionParser();
+        $constraint = $versionParser->parseConstraints($a);
+        $other = $versionParser->parseConstraints($b);
+
+        return Intervals::isSubsetOf($constraint, $other) && Intervals::isSubsetOf($other, $constraint);
+    }
+
+    /**
+     * ext_emconf.php range spanning the given versions: lowest.0 to highest.99.
+     *
+     * @param non-empty-list<string> $versions major.minor, optionally with a leading caret
+     */
+    private function emConfRangeFor(array $versions): string
+    {
+        return ltrim($versions[0], '^') . '.0-' . ltrim($versions[count($versions) - 1], '^') . '.99';
     }
 
     #[Test]
     public function composerJsonVersionMatchesExtEmconf(): void
     {
-        $composer = $this->composerJson();
-        $extra = $composer['extra'] ?? null;
-        self::assertIsArray($extra);
-        $typo3Cms = $extra['typo3/cms'] ?? null;
-        self::assertIsArray($typo3Cms);
-
         self::assertSame(
-            $this->extEmConfValue('version'),
-            $typo3Cms['version'] ?? null,
+            $this->extEmConfVersion(),
+            $this->composerTypo3Extra()['version'] ?? null,
             'composer.json extra.typo3/cms.version must match ext_emconf.php version '
             . '(TYPO3 14.3 reads the first, 13.4 the second; keep both in sync on every release bump).',
         );
@@ -124,28 +261,31 @@ final class VersionConsistencyTest extends UnitTestCase
     #[Test]
     public function typo3RangeAgreesAcrossComposerExtEmconfAndCi(): void
     {
-        $matrix = $this->ciMatrix('typo3-versions');
-        $composer = $this->composerJson();
-        $require = $composer['require'] ?? null;
-        self::assertIsArray($require);
-        $required = $require['typo3/cms-core'] ?? null;
-        self::assertIsString($required);
+        $tested = $this->ciTested('typo3');
+        $required = $this->composerRequire('typo3/cms-core');
 
-        // The shared CI workflow narrows typo3/cms-core in composer.json to the
-        // one matrix cell it installs, so inside a CI job the file says `^13.4`
-        // where the repository declares `^13.4 || ^14.3`. Accept the full range
-        // or exactly one of its cells, nothing else.
-        $cells = array_map(static fn(string $version): string => '^' . $version, $matrix);
-        self::assertContains(
-            $required,
-            [implode(' || ', $cells), ...$cells],
-            'composer.json requires typo3/cms-core "' . $required . '", but the CI matrix tests '
-            . implode(', ', $cells) . '.',
+        // Shared CI and `runTests.sh -t` narrow typo3/cms-core in composer.json
+        // to the one matrix cell they install, before this test runs. Inside
+        // such a run the file says `^13.4` where the repository declares
+        // `^13.4 || ^14.3`, so a single tested cell has to be accepted.
+        // What this no longer detects: a single-cell constraint committed by
+        // accident (`^14.3` alone) passes here. That has to be caught in review
+        // or at release.
+        $accepted = [implode(' || ', $tested), ...$tested];
+        $matches = array_filter(
+            $accepted,
+            fn(string $constraint): bool => $this->sameConstraint($required, $constraint),
+        );
+        self::assertNotSame(
+            [],
+            $matches,
+            'composer.json requires typo3/cms-core "' . $required . '", which is neither the range the CI matrix tests ("'
+            . $accepted[0] . '") nor a single one of its cells.',
         );
 
         self::assertSame(
-            $this->emConfRangeFor($matrix),
-            $this->extEmConfValue('typo3'),
+            $this->emConfRangeFor($tested),
+            $this->extEmConfDepends('typo3'),
             'ext_emconf.php typo3 constraint must span exactly the TYPO3 versions the CI matrix tests.',
         );
     }
@@ -153,20 +293,17 @@ final class VersionConsistencyTest extends UnitTestCase
     #[Test]
     public function phpRangeAgreesAcrossComposerExtEmconfAndCi(): void
     {
-        $matrix = $this->ciMatrix('php-versions');
-        $composer = $this->composerJson();
-        $require = $composer['require'] ?? null;
-        self::assertIsArray($require);
+        $tested = $this->ciTested('php');
 
-        self::assertSame(
-            '^' . $matrix[0],
-            $require['php'] ?? null,
-            'composer.json php constraint must start at the lowest PHP version the CI matrix tests.',
+        self::assertTrue(
+            $this->sameConstraint($this->composerRequire('php'), '^' . $tested[0]),
+            'composer.json php constraint "' . $this->composerRequire('php')
+            . '" must be ^' . $tested[0] . ', starting at the lowest PHP version the CI matrix tests.',
         );
 
         self::assertSame(
-            $this->emConfRangeFor($matrix),
-            $this->extEmConfValue('php'),
+            $this->emConfRangeFor($tested),
+            $this->extEmConfDepends('php'),
             'ext_emconf.php php constraint must span exactly the PHP versions the CI matrix tests.',
         );
     }

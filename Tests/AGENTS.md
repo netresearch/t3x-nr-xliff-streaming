@@ -27,6 +27,7 @@ This directory contains comprehensive test coverage:
 - **Unit/Parser/XliffStreamingParserXXETest.php** - Security tests (XXE, DoS, SSRF)
 - **Unit/Parser/XliffStreamingParserEdgeCasesTest.php** - Edge case handling
 - **Unit/Parser/XliffStreamingParserIntegrationTest.php** - Fixture-based integration tests
+- **Unit/VersionConsistencyTest.php** - Version and TYPO3/PHP ranges agree across composer.json, ext_emconf.php and the CI matrix
 - **Performance/ParserBenchmarkTest.php** - Performance benchmarks
 - **Unit/Fixtures/** and **Fixtures/** - XLIFF sample files (valid, invalid, security)
 
