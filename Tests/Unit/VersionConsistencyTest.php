@@ -7,6 +7,7 @@ namespace Netresearch\NrXliffStreaming\Tests\Unit;
 use Composer\Semver\Intervals;
 use Composer\Semver\VersionParser;
 use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\Yaml\Yaml;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
@@ -92,10 +93,13 @@ final class VersionConsistencyTest extends UnitTestCase
         self::assertIsString($extensionKey, 'composer.json must declare extra.typo3/cms.extension-key');
 
         $include = static function (string $path, string $_EXTKEY): mixed {
-            $EM_CONF = null;
+            // `include`, not `include_once`: the unit test bootstrap has already
+            // included this file (testing-framework ComposerPackageManager::
+            // getExtEmConf()), so include_once would return true without
+            // assigning $EM_CONF here.
             include $path;
             // Read back through get_defined_vars(): static analysis cannot see
-            // that the include assigns $EM_CONF, and would take it as null.
+            // that the include assigns $EM_CONF.
             $emConf = get_defined_vars()['EM_CONF'] ?? null;
 
             return is_array($emConf) ? ($emConf[$_EXTKEY] ?? null) : null;
@@ -150,22 +154,18 @@ final class VersionConsistencyTest extends UnitTestCase
             }
 
             ++$matrixJobs;
-            $axes = [
-                'php' => $this->stringList($with['php-versions'], 'php-versions'),
-                'typo3' => $this->stringList($with['typo3-versions'], 'typo3-versions'),
-            ];
             $excludes = isset($with['matrix-exclude'])
                 ? $this->jsonList($with['matrix-exclude'], 'matrix-exclude')
                 : [];
-
-            foreach ($axes['php'] as $php) {
-                foreach ($axes['typo3'] as $typo3) {
-                    $cell = ['php' => $php, 'typo3' => $typo3];
-                    if (!$this->isExcluded($cell, $excludes)) {
-                        $tested[] = $cell[$axis];
-                    }
-                }
-            }
+            $tested = [
+                ...$tested,
+                ...$this->testedValues(
+                    $this->stringList($with['php-versions'], 'php-versions'),
+                    $this->stringList($with['typo3-versions'], 'typo3-versions'),
+                    $excludes,
+                    $axis,
+                ),
+            ];
         }
 
         self::assertGreaterThan(0, $matrixJobs, 'ci.yml must have a job that sets php-versions and typo3-versions');
@@ -173,6 +173,30 @@ final class VersionConsistencyTest extends UnitTestCase
 
         $tested = array_values(array_unique($tested));
         sort($tested, SORT_NATURAL);
+
+        return $tested;
+    }
+
+    /**
+     * The value on $axis of every php x typo3 cell that no exclude entry removes.
+     *
+     * @param list<string> $phpVersions
+     * @param list<string> $typo3Versions
+     * @param list<mixed> $excludes
+     *
+     * @return list<string>
+     */
+    private function testedValues(array $phpVersions, array $typo3Versions, array $excludes, string $axis): array
+    {
+        $tested = [];
+        foreach ($phpVersions as $phpVersion) {
+            foreach ($typo3Versions as $typo3Version) {
+                $cell = ['php' => $phpVersion, 'typo3' => $typo3Version];
+                if (!$this->isExcluded($cell, $excludes)) {
+                    $tested[] = $cell[$axis];
+                }
+            }
+        }
 
         return $tested;
     }
@@ -238,13 +262,44 @@ final class VersionConsistencyTest extends UnitTestCase
     }
 
     /**
-     * ext_emconf.php range spanning the given versions: lowest.0 to highest.99.
+     * ext_emconf.php range spanning the given versions. The floor is the lowest
+     * version, with `.0` appended only when it names major.minor, so a raised
+     * patch floor (`13.4.21`) stays as it is. The ceiling is the highest
+     * version's major.minor with `.99`.
      *
-     * @param non-empty-list<string> $versions major.minor, optionally with a leading caret
+     * @param non-empty-list<string> $versions major.minor or major.minor.patch, optionally with a leading caret
      */
     private function emConfRangeFor(array $versions): string
     {
-        return ltrim($versions[0], '^') . '.0-' . ltrim($versions[count($versions) - 1], '^') . '.99';
+        $floor = ltrim($versions[0], '^');
+        if (count(explode('.', $floor)) === 2) {
+            $floor .= '.0';
+        }
+
+        $ceiling = implode('.', array_slice(explode('.', ltrim($versions[count($versions) - 1], '^')), 0, 2));
+
+        return $floor . '-' . $ceiling . '.99';
+    }
+
+    /**
+     * @return iterable<string, array{non-empty-list<string>, string}>
+     */
+    public static function emConfRangeCases(): iterable
+    {
+        yield 'TYPO3 cells' => [['^13.4', '^14.3'], '13.4.0-14.3.99'];
+        yield 'PHP cells' => [['8.2', '8.3', '8.4', '8.5'], '8.2.0-8.5.99'];
+        yield 'raised patch floor' => [['^13.4.21', '^14.3'], '13.4.21-14.3.99'];
+        yield 'patch-level top cell' => [['^13.4', '^14.3.2'], '13.4.0-14.3.99'];
+    }
+
+    /**
+     * @param non-empty-list<string> $versions
+     */
+    #[Test]
+    #[DataProvider('emConfRangeCases')]
+    public function emConfRangeSpansTheTestedVersions(array $versions, string $expected): void
+    {
+        self::assertSame($expected, $this->emConfRangeFor($versions));
     }
 
     #[Test]
