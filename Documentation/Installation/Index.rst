@@ -13,8 +13,8 @@ Before installing the XLIFF Streaming Parser extension, ensure your system meets
 the following requirements:
 
 **Required:**
-   - TYPO3 13.4 or higher
-   - PHP 8.2, 8.3, or 8.4
+   - TYPO3 13.4 LTS or 14.3 LTS
+   - PHP 8.2, 8.3, 8.4, or 8.5
    - XMLReader PHP extension (standard, typically enabled by default)
 
 **Recommended:**
@@ -122,7 +122,7 @@ If the extension is not found after installation:
 
 1. Clear all caches: ``vendor/bin/typo3 cache:flush``
 2. Verify composer.json includes the package
-3. Check TYPO3 version compatibility (13.4+)
+3. Check TYPO3 version compatibility (13.4 LTS or 14.3 LTS)
 
 **XMLReader Extension Missing:**
 

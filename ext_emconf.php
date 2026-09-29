@@ -2,7 +2,7 @@
 
 $EM_CONF[$_EXTKEY] = [
     'title' => 'XLIFF Streaming Parser',
-    'description' => 'High-performance streaming XLIFF parser supporting large translation files (10MB+) with constant memory footprint. Uses XMLReader for 30x memory reduction and 60x speed improvement over SimpleXML.',
+    'description' => 'High-performance streaming XLIFF parser for TYPO3 supporting large translation files (10MB+) with constant memory footprint. Uses XMLReader for 30x memory reduction and 60x speed improvement over SimpleXML.',
     'category' => 'be',
     'author' => 'Netresearch DTT GmbH',
     'author_email' => 'info@netresearch.de',
@@ -11,8 +11,8 @@ $EM_CONF[$_EXTKEY] = [
     'version' => '0.9.0-dev',
     'constraints' => [
         'depends' => [
-            'typo3' => '13.4.0-13.4.99',
-            'php' => '8.2.0-8.4.99',
+            'typo3' => '13.4.0-14.3.99',
+            'php' => '8.2.0-8.5.99',
         ],
         'conflicts' => [],
         'suggests' => [],

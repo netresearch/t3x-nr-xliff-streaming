@@ -77,7 +77,7 @@ Key Features
    Memory-efficient iteration using PHP generators
 
 ✅ **Dependency Injection**
-   Modern TYPO3 13.x architecture with Services.yaml configuration
+   TYPO3 13.4 LTS and 14.3 LTS architecture with Services.yaml configuration
 
 ✅ **Drop-in Replacement**
    Easy migration from SimpleXML to streaming parser
@@ -103,6 +103,6 @@ When to Use This Extension
 Requirements
 ============
 
-- TYPO3 13.4 or higher
-- PHP 8.2, 8.3, or 8.4
+- TYPO3 13.4 LTS or 14.3 LTS
+- PHP 8.2, 8.3, 8.4, or 8.5
 - XMLReader PHP extension (standard, typically enabled)
