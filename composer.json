@@ -68,7 +68,7 @@
                 "providesPackages": {}
             },
             "extension-key": "nr_xliff_streaming",
-            "version": "0.9.0-dev",
+            "version": "1.0.0",
             "web-dir": ".Build/web"
         }
     },

@@ -567,7 +567,7 @@ The skill provides comprehensive guidance for all TYPO3-specific documentation n
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="https://www.phpdoc.org/guides https://www.phpdoc.org/guides/guides.xsd"
 >
-    <project title="XLIFF Streaming Parser" version="1.0.0"/>
+    <project title="XLIFF Streaming Parser" version="1.0.0" release="1.0.0"/>
     <extension class="\T3Docs\Typo3DocsTheme\DependencyInjection\Typo3DocsThemeExtension"
                edit-on-github="netresearch/t3x-nr-xliff-streaming"
                edit-on-github-branch="main"

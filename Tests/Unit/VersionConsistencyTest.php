@@ -6,6 +6,8 @@ namespace Netresearch\NrXliffStreaming\Tests\Unit;
 
 use Composer\Semver\Intervals;
 use Composer\Semver\VersionParser;
+use DOMDocument;
+use DOMElement;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -21,7 +23,10 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
  * and a version (PackageManager::isComposerOnlyCapable(), deprecation
  * #108345), while TYPO3 13.4 still reads ext_emconf.php. A release bump that
  * touches only one file therefore shows a stale version on one of the two
- * lines; this test fails instead.
+ * lines; this test fails instead. The rendered documentation prints the
+ * version through `|release|`, which render-guides fills from the `release`
+ * attribute of `<project>` in Documentation/guides.xml, so that attribute is
+ * pinned to the same value.
  *
  * The supported TYPO3 and PHP ranges are stated three times as well: in
  * composer.json, in ext_emconf.php and in the CI matrix. This repository has
@@ -32,7 +37,8 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
  *
  * Each source is read the way its consumer reads it: ext_emconf.php is
  * included with $_EXTKEY set, as TYPO3's PackageManager does, ci.yml is
- * parsed as YAML and its matrix inputs as JSON, as GitHub Actions does, and
+ * parsed as YAML and its matrix inputs as JSON, as GitHub Actions does,
+ * guides.xml is parsed as namespaced XML, as render-guides does, and
  * composer constraints are compared as version intervals, as composer does.
  */
 #[CoversNothing]
@@ -310,6 +316,25 @@ final class VersionConsistencyTest extends UnitTestCase
             $this->composerTypo3Extra()['version'] ?? null,
             'composer.json extra.typo3/cms.version must match ext_emconf.php version '
             . '(TYPO3 14.3 reads the first, 13.4 the second; keep both in sync on every release bump).',
+        );
+    }
+
+    #[Test]
+    public function guidesXmlReleaseMatchesExtEmconf(): void
+    {
+        $domDocument = new DOMDocument();
+        self::assertTrue(
+            $domDocument->load($this->repoRoot() . '/Documentation/guides.xml'),
+            'Documentation/guides.xml must be well-formed XML',
+        );
+        $project = $domDocument->getElementsByTagNameNS('https://www.phpdoc.org/guides', 'project')->item(0);
+        self::assertInstanceOf(DOMElement::class, $project, 'Documentation/guides.xml must carry a <project> element');
+
+        self::assertSame(
+            $this->extEmConfVersion(),
+            $project->getAttribute('release'),
+            'Documentation/guides.xml <project release> must match ext_emconf.php version '
+            . '(the docs start page prints it through |release|; without it the Version field is empty).',
         );
     }
 
