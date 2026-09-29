@@ -30,7 +30,7 @@ Initial Release
 * TYPO3 13.4 LTS and 14.3 LTS compatibility
 * PHP 8.2, 8.3, 8.4, and 8.5 support
 * Complete RST documentation with performance and security sections
-* 39 unit tests with security test coverage
+* 40 unit tests with security test coverage
 * PHPStan level 9 static analysis
 * TYPO3 Coding Standards compliance
 

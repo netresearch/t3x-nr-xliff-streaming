@@ -26,7 +26,7 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
  * lines; this test fails instead. The rendered documentation prints the
  * version through `|release|`, which render-guides fills from the `release`
  * attribute of `<project>` in Documentation/guides.xml, so that attribute is
- * pinned to the same value.
+ * pinned to the same value, and its `version` attribute to the major.minor.
  *
  * The supported TYPO3 and PHP ranges are stated three times as well: in
  * composer.json, in ext_emconf.php and in the CI matrix. This repository has
@@ -319,8 +319,7 @@ final class VersionConsistencyTest extends UnitTestCase
         );
     }
 
-    #[Test]
-    public function guidesXmlReleaseMatchesExtEmconf(): void
+    private function guidesProject(): DOMElement
     {
         $domDocument = new DOMDocument();
         self::assertTrue(
@@ -330,11 +329,28 @@ final class VersionConsistencyTest extends UnitTestCase
         $project = $domDocument->getElementsByTagNameNS('https://www.phpdoc.org/guides', 'project')->item(0);
         self::assertInstanceOf(DOMElement::class, $project, 'Documentation/guides.xml must carry a <project> element');
 
+        return $project;
+    }
+
+    #[Test]
+    public function guidesXmlReleaseMatchesExtEmconf(): void
+    {
         self::assertSame(
             $this->extEmConfVersion(),
-            $project->getAttribute('release'),
+            $this->guidesProject()->getAttribute('release'),
             'Documentation/guides.xml <project release> must match ext_emconf.php version '
             . '(the docs start page prints it through |release|; without it the Version field is empty).',
+        );
+    }
+
+    #[Test]
+    public function guidesXmlVersionIsMajorMinorOfExtEmconf(): void
+    {
+        self::assertSame(
+            implode('.', array_slice(explode('.', $this->extEmConfVersion()), 0, 2)),
+            $this->guidesProject()->getAttribute('version'),
+            'Documentation/guides.xml <project version> must be the major.minor of ext_emconf.php version '
+            . '(render-guides convention: version is the short form, release the full one).',
         );
     }
 
