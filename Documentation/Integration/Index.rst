@@ -227,6 +227,8 @@ The parser throws ``InvalidXliffException`` for malformed XLIFF:
 1700000005
    Missing or empty ``<source>`` element
 
+.. _integration-migration:
+
 Migration from SimpleXML
 =========================
 

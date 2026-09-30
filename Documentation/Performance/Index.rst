@@ -248,6 +248,8 @@ Real-World Impact
    - Uploads complete in seconds
    - Predictable server resource usage
 
+.. _performance-optimization:
+
 Optimization Tips
 =================
 
