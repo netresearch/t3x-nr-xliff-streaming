@@ -51,6 +51,12 @@ final class XliffStreamingParser implements XliffParserInterface
      */
     public function parseTransUnits(string $xmlContent): Generator
     {
+        // XMLReader::XML() throws a ValueError for an empty string, which is
+        // not part of this method's contract.
+        if ($xmlContent === '') {
+            throw new InvalidXliffException('Failed to parse XML content: input is empty', 1700000001);
+        }
+
         // XMLReader::XML() is static as of PHP 8.0 and returns the reader it
         // set up, so take it from the return value instead of calling it on a
         // separately constructed instance.

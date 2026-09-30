@@ -27,6 +27,17 @@ final class XliffStreamingParserEdgeCasesTest extends UnitTestCase
     }
 
     #[Test]
+    public function throwsInvalidXliffExceptionForEmptyInput(): void
+    {
+        // XMLReader::XML() throws a ValueError for an empty string; a caller
+        // that catches InvalidXliffException per the interface must see that.
+        $this->expectException(InvalidXliffException::class);
+        $this->expectExceptionCode(1700000001);
+
+        iterator_to_array($this->xliffStreamingParser->parseTransUnits(''));
+    }
+
+    #[Test]
     public function handlesEmptyStringIdAttribute(): void
     {
         $xliff = <<<'XML'
