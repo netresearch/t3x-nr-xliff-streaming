@@ -15,7 +15,7 @@ The extension has no backend module, no frontend plugin, no controller, no conso
 1. Parsing an untrusted document must not read local files, fetch network resources or load DTDs.
 2. Parsing an untrusted document must not let entity expansion multiply the input or exhaust the process.
 3. Invalid input must end in `InvalidXliffException` or in the end of iteration, never in a unit carrying content from outside the document or from an expanded entity declaration.
-4. The parser's own working memory must not grow with the number of units.
+4. The parser must not build a tree of the whole document; memory beyond the input and libxml2's copy of it must not grow with the number of units.
 
 ## Security expectations
 
@@ -31,7 +31,7 @@ What a user can expect:
 
 What a user cannot expect:
 
-- The parser does not bound the input size. The API takes the whole document as a string, so the caller holds it in memory; measured peak memory for a 55 MB document was the input size plus less than 1 MB. The parser's own working set is one unit at a time (`expand()` in `extractTransUnit()` builds one subtree). Callers that accept uploads limit the size before reading the content, as the upload example in `Documentation/Security/Index.rst` does.
+- The parser does not bound the input size. The API takes the whole document as a string, so the caller holds it in memory, and libxml2 keeps its own copy of the buffer while parsing: for a 56.6 MB document the process grew by 57.5 MB during parsing, while PHP's `memory_get_peak_usage()` showed the input size plus less than 1 MB (libxml2 allocates outside PHP's memory manager, so `memory_limit` does not count its copy). Beyond that copy the parser works on one unit at a time (`expand()` in `extractTransUnit()` builds one subtree); measurements in `Documentation/Performance/Index.rst`. Callers that accept uploads limit the size before reading the content, as the upload example in `Documentation/Security/Index.rst` does.
 - Malformed XML does not raise an exception. libxml2 reports it as an `E_WARNING` from `XMLReader::read()`, and the `while ($xmlReader->read())` loop in `parseTransUnits()` ends. The caller receives the units before the error, or none, and cannot tell a truncated document from a short one by the result alone (pinned by `handlesMalformedXmlGracefully` in `Tests/Unit/Parser/XliffStreamingParserTest.php`). The same applies when libxml2 stops at its entity amplification limit: depending on the libxml2 version the parser throws or ends without a unit. A caller that must detect this has to observe the warnings, for example with `set_error_handler()` around the iteration.
 - The parser does not validate against the XLIFF schema and does not interpret the content. `source` and `target` are returned as text; escaping them for HTML, SQL or any other output is the caller's job.
 - Exception messages contain values from the input (the unit `id` in the 1700000005 message) and libxml2 warnings contain the base URI, which is the working directory. Callers log them and show users a generic message, as `Documentation/Security/Index.rst` ("Error Handling") shows.
