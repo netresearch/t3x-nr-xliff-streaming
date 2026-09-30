@@ -18,15 +18,14 @@ XliffStreamingParser
 
    High-performance streaming XLIFF parser using XMLReader.
 
-   This parser uses XMLReader to stream through XLIFF files node-by-node,
-   maintaining constant memory usage (~30MB) regardless of file size.
-   It provides 60x speed improvement and 30x memory reduction compared
-   to SimpleXML-based parsing.
+   This parser uses XMLReader to stream through XLIFF documents node by node
+   and builds a tree for one translation unit at a time.
 
-   **Performance:**
-      - Memory: Constant ~30MB (vs 900MB with SimpleXML for 108MB file)
-      - Speed: 90 seconds (vs 90 minutes with SimpleXML for 100MB file)
-      - Efficiency: 30x memory reduction, 60x speed improvement
+   **Performance** (see :ref:`performance`):
+      - Memory: parsing adds about the input size to the process, SimpleXML
+        about eight times the input size
+      - Speed: slower than a single SimpleXML XPath query, because each unit
+        is parsed a second time on its own
 
    **Supported XLIFF Versions:**
       - XLIFF 1.0 (no namespace)

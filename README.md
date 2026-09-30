@@ -2,7 +2,7 @@
 <!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
 # TYPO3 Extension: XLIFF Streaming Parser
 
-High-performance streaming XLIFF parser for TYPO3 supporting large translation files (10MB+) with constant memory footprint.
+Streaming XLIFF parser for TYPO3. It reads XLIFF 1.0, 1.2 and 2.0 with XMLReader one translation unit at a time instead of building a SimpleXML tree of the whole document, which keeps the memory needed for large translation files low.
 
 [![TYPO3 13](https://img.shields.io/badge/TYPO3-13-orange.svg)](https://get.typo3.org/version/13)
 [![TYPO3 14](https://img.shields.io/badge/TYPO3-14-orange.svg)](https://get.typo3.org/version/14)
@@ -11,9 +11,8 @@ High-performance streaming XLIFF parser for TYPO3 supporting large translation f
 
 ## Features
 
-- **High Performance**: 60x faster than SimpleXML for large files (90 seconds vs 90 minutes)
-- **Memory Efficient**: 30x memory reduction (30MB vs 900MB for 108MB file)
-- **Constant Memory**: Memory usage independent of file size
+- **Low memory**: parsing adds about the size of the input to the process, where SimpleXML adds about eight times the size (see below)
+- **One unit at a time**: only the current unit is built as a tree
 - **XLIFF Support**: Full XLIFF 1.0, 1.2, and 2.0 support (trans-unit and unit elements)
 - **XXE Protection**: Built-in protection against XML External Entity attacks
 - **Generator Pattern**: Stream-based processing for optimal resource usage
@@ -68,11 +67,15 @@ final class MyTranslationService
 
 ## Performance Comparison
 
-| File Size | SimpleXML Memory | Streaming Memory | SimpleXML Time | Streaming Time |
-|-----------|------------------|------------------|----------------|----------------|
-| 1 MB      | 8 MB            | 30 MB            | 0.5s          | 0.1s          |
-| 10 MB     | 80 MB           | 30 MB            | 5s            | 0.5s          |
-| 100 MB    | 800 MB          | 30 MB            | 90min         | 90s           |
+Measured on PHP 8.5.10 with libxml2 2.9.14, generated XLIFF 1.2 documents. "Added memory" is the growth of the process's resident memory while parsing, on top of the input string the caller already holds.
+
+| Input size | Units | Streaming added memory | SimpleXML added memory | Streaming time | SimpleXML time |
+|-----------:|------:|-----------------------:|-----------------------:|---------------:|---------------:|
+| 1.7 MB | 10,000 | 2.4 MB | 13.4 MB | 0.11 s | 0.01 s |
+| 16.9 MB | 100,000 | 17.4 MB | 131.6 MB | 1.14 s | 0.14 s |
+| 56.6 MB | 330,000 | 57.5 MB | 439.6 MB | 3.96 s | 0.42 s |
+
+Memory is not independent of the file size: `parseTransUnits()` takes the whole document as a string, and libxml2 keeps its own copy of that buffer while parsing, so peak memory is about twice the input size plus a constant. PHP's `memory_get_peak_usage()` sees only the input string plus less than 1 MB, because libxml2 allocates outside PHP's memory manager. Streaming is slower than a single SimpleXML XPath query, because each unit is parsed a second time on its own; its advantage is memory. Earlier versions of this README claimed a constant 30 MB and a 60x speed-up (90 minutes against 90 seconds); nothing in this repository reproduces those figures, and the measurement above contradicts them, so they were removed.
 
 ## Supported XLIFF Versions
 

@@ -263,20 +263,20 @@ Migrating from TYPO3's SimpleXML parsing to streaming:
 
 **Benefits:**
 
-- 30x memory reduction (constant ~30MB vs 900MB for large files)
-- 60x speed improvement (90 seconds vs 90 minutes)
+- Less memory: about one input size added, against about eight for SimpleXML
 - Same functional output (compatible data structure)
 - Built-in XXE protection
 
 Memory-Efficient Processing
 ============================
 
-The parser uses PHP Generators for constant memory usage:
+The parser yields one unit at a time through a PHP Generator:
 
 .. code-block:: php
    :caption: Example: Processing large files efficiently
 
-   // Memory usage remains ~30MB regardless of file size
+   // The whole document is in memory as a string; the parser adds
+   // about its size again while parsing, not a tree of all units
    $xliffContent = file_get_contents('large-100MB-file.xlf');
 
    $count = 0;
@@ -291,10 +291,9 @@ The parser uses PHP Generators for constant memory usage:
 
 **Key Points:**
 
-- File size irrelevant to memory usage
-- One trans-unit in memory at a time
-- Previous units automatically garbage collected
-- Constant ~30MB memory footprint
+- One trans-unit is built as a tree at a time
+- Previous units are garbage collected unless you keep them
+- Peak memory is about twice the file size plus a constant, not independent of it
 
 Batch Processing
 ================

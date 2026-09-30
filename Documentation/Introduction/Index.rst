@@ -24,49 +24,31 @@ XML document into memory. This approach causes severe problems with large transl
 files:
 
 **Memory Issues:**
-   - 10MB XLIFF file → 80-90MB memory usage
-   - 100MB XLIFF file → 800-900MB memory usage
-   - Memory consumption scales 8-9x with file size
-
-**Performance Issues:**
-   - Large files (>10MB) cause 5-10 minute upload timeouts
-   - Processing times become exponentially longer
-   - Server resources exhausted on concurrent uploads
-
-**Real-World Impact:**
-   - Translators cannot import large translation memories
-   - Batch translation imports fail
-   - Manual splitting of files required (time-consuming, error-prone)
+   - Building the SimpleXML tree adds about eight times the input size to the
+     process (measured: 439.6 MB for a 56.6 MB document)
+   - Large translation files therefore run into ``memory_limit``
 
 The Solution
 ============
 
 This extension solves these problems using **XMLReader streaming**:
 
-**Constant Memory:**
-   XMLReader streams through the file node-by-node, processing one translation
-   unit at a time. Memory usage stays constant (~30MB) regardless of file size.
+**One unit at a time:**
+   XMLReader streams through the document node by node and builds a tree for
+   one translation unit at a time.
 
-**60x Performance:**
-   Benchmarks show 60x speed improvement for large files:
-
-   - SimpleXML: 90 minutes for 100MB file
-   - XMLReader Streaming: 90 seconds for same file
-
-**30x Memory Efficiency:**
-   Real-world measurements show 30x memory reduction:
-
-   - SimpleXML: 900MB for 108MB file
-   - XMLReader Streaming: 30MB for same file
+**Lower memory:**
+   Parsing adds about the input size to the process instead of about eight
+   times the input size (measured: 57.5 MB against 439.6 MB for a 56.6 MB
+   document). Memory still grows with the file: the document is passed as a
+   string, and libxml2 keeps a copy of it while parsing. See
+   :ref:`performance`.
 
 Key Features
 ============
 
-✅ **High Performance**
-   60x faster than SimpleXML for large files
-
 ✅ **Memory Efficient**
-   30x memory reduction with constant memory footprint
+   About one input size of added memory, against about eight for SimpleXML
 
 ✅ **XLIFF Version Support**
    - XLIFF 1.0 (no namespace)

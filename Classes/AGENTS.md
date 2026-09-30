@@ -31,8 +31,7 @@ This directory contains the core parser logic and exception handling:
 - **Exception/InvalidXliffException.php** - Exception for malformed XLIFF
 
 **Design Goals:**
-- Constant memory footprint (~30MB regardless of file size)
-- 60x speed improvement over SimpleXML
+- One translation unit built as a tree at a time (memory grows with the input string, see Documentation/Performance)
 - XXE attack protection (CWE-611)
 - XLIFF 1.0, 1.2, 2.0 support
 
@@ -162,7 +161,7 @@ Before committing code in Classes/:
 
 ## Good vs. bad examples
 
-### ✅ Good: Generator pattern with constant memory
+### ✅ Good: Generator pattern, one unit at a time
 ```php
 public function parseTransUnits(string $xmlContent): \Generator
 {
@@ -247,7 +246,7 @@ throw new \Exception('Invalid XLIFF');  // No context, no code
 ## House Rules
 
 ### Performance requirements
-- Memory usage MUST remain constant (~30MB) regardless of file size
+- Memory MUST NOT hold more than one unit tree at a time (no whole-document DOM)
 - Processing time MUST scale linearly with file size
 - Use `memory_get_peak_usage()` in tests to verify
 

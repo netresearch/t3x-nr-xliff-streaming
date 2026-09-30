@@ -158,8 +158,8 @@ If you encounter memory limit errors even with streaming:
 
    memory_limit = 256M
 
-The streaming parser should maintain constant ~30MB memory usage regardless of
-file size, but ensure your PHP configuration allows at least 128MB.
+The document is held in memory as a string, and libxml2 keeps a copy of it while
+parsing. Set ``memory_limit`` well above the size of the largest file you parse.
 
 Next Steps
 ==========

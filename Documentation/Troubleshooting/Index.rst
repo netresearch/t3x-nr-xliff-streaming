@@ -274,7 +274,7 @@ Parsing is Slower Than Expected
 High Memory Usage
 -----------------
 
-**Problem**: Memory usage exceeds expected ~30MB
+**Problem**: Memory usage exceeds about twice the file size
 
 **Solutions**:
 
