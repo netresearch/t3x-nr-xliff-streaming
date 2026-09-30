@@ -46,7 +46,7 @@ This policy covers the `nr_xliff_streaming` TYPO3 extension code. For vulnerabil
 
 ## Security Design
 
-The threat model, trust boundaries and the evidence for the extension's XML hardening are in [docs/SECURITY-ASSURANCE.md](docs/SECURITY-ASSURANCE.md).
+The threat model, trust boundaries and the evidence for the extension's XML hardening are in [docs/SECURITY-ASSURANCE.md](https://github.com/netresearch/t3x-nr-xliff-streaming/blob/main/docs/SECURITY-ASSURANCE.md).
 
 ## Safe Harbor
 

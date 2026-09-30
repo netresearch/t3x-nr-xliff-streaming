@@ -93,7 +93,7 @@ This extension provides built-in protection against:
 
 All XML parsing uses `LIBXML_NONET` flag to prevent network access during parsing.
 
-The security assurance case, with the threat model, trust boundaries and what callers still have to do themselves (for example bound the input size), is in [docs/SECURITY-ASSURANCE.md](docs/SECURITY-ASSURANCE.md).
+The security assurance case, with the threat model, trust boundaries and what callers still have to do themselves (for example bound the input size), is in [docs/SECURITY-ASSURANCE.md](https://github.com/netresearch/t3x-nr-xliff-streaming/blob/main/docs/SECURITY-ASSURANCE.md).
 
 ## Requirements
 
