@@ -125,7 +125,11 @@ InvalidXliffException: Failed to parse XML content
 
 **Error Code**: 1700000001
 
-**Problem**: XML is malformed or not well-formed
+**Problem**: The input is empty, or XMLReader could not open it
+
+Malformed XML does not raise this exception. libxml2 reports it as a PHP
+warning from ``XMLReader::read()`` and the parser stops yielding units, so a
+broken file yields the units before the error, or none.
 
 **Solutions**:
 
@@ -159,7 +163,8 @@ External entities are blocked
 
 **Error Code**: 1700000003
 
-**Problem**: XLIFF contains external entity references (security protection)
+**Problem**: A unit references an entity other than the five predefined XML
+entities (``&amp;``, ``&lt;``, ``&gt;``, ``&quot;``, ``&apos;``)
 
 **This is expected behavior** for security reasons. The parser blocks XXE attacks.
 
@@ -169,7 +174,7 @@ If you have legitimate entity usage, convert to inline content:
 
 .. code-block:: xml
 
-   <!-- ❌ Blocked (external entity) -->
+   <!-- ❌ Rejected (entity declared in the document) -->
    <!DOCTYPE xliff [
        <!ENTITY company "Acme Corp">
    ]>

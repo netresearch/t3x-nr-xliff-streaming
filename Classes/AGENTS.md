@@ -118,8 +118,9 @@ throw new InvalidXliffException(
 
 ### XML parsing MUST use LIBXML_NONET
 ```php
-// ✅ Correct - prevents XXE attacks
-$reader->XML($xmlContent, 'UTF-8', LIBXML_NONET);
+// ✅ Correct - no entity substitution, no DTD loading, no network
+// (never add LIBXML_NOENT, LIBXML_DTDLOAD or LIBXML_PARSEHUGE)
+$xmlReader = XMLReader::XML($xmlContent, 'UTF-8', LIBXML_NONET);
 
 simplexml_load_string(
     $xml,
@@ -127,8 +128,8 @@ simplexml_load_string(
     LIBXML_NONET  // Required!
 );
 
-// ❌ Wrong - vulnerable to XXE
-$reader->XML($xmlContent);
+// ❌ Wrong - loads external entities and DTDs
+$xmlReader = XMLReader::XML($xmlContent, 'UTF-8', LIBXML_NOENT | LIBXML_DTDLOAD);
 ```
 
 ### Protected against
@@ -163,9 +164,9 @@ Before committing code in Classes/:
 ```php
 public function parseTransUnits(string $xmlContent): \Generator
 {
-    $reader = new \XMLReader();
+    $reader = \XMLReader::XML($xmlContent, 'UTF-8', LIBXML_NONET);
 
-    if (!$reader->XML($xmlContent, 'UTF-8', LIBXML_NONET)) {
+    if (!$reader instanceof \XMLReader) {
         throw new InvalidXliffException('Failed to parse XML', 1700000001);
     }
 

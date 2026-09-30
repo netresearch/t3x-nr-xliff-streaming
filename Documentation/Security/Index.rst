@@ -95,21 +95,24 @@ The parser provides two layers of XXE protection:
 Layer 1: XMLReader Validation
 ------------------------------
 
-XMLReader itself does not automatically load external entities by default,
-providing the first layer of defense.
+The parser never passes ``LIBXML_NOENT``, ``LIBXML_DTDLOAD`` or
+``LIBXML_PARSEHUGE``. XMLReader therefore does not load external DTDs or
+external entities and does not substitute entity references, and libxml2's
+default size limits stay in force. ``LIBXML_NONET`` additionally blocks every
+network fetch.
 
 .. code-block:: php
    :caption: Classes/Parser/XliffStreamingParser.php (excerpt)
 
-   $reader = new \XMLReader();
-   $reader->XML($xmlContent, 'UTF-8', LIBXML_NONET);
-   // LIBXML_NONET disables network access during parsing
+   $xmlReader = XMLReader::XML($xmlContent, 'UTF-8', LIBXML_NONET);
 
 Layer 2: SimpleXMLElement Protection
 -------------------------------------
 
-When converting XMLReader nodes to SimpleXMLElement for data extraction,
-``LIBXML_NONET`` flag is explicitly enforced:
+Each unit is read with ``readOuterXml()`` and parsed again on its own. That
+fragment has no DTD, so a reference to any entity other than the five
+predefined XML entities fails and the unit is rejected with code
+1700000003:
 
 .. code-block:: php
    :caption: Classes/Parser/XliffStreamingParser.php (excerpt)
@@ -339,21 +342,26 @@ XML Bomb Attacks
 
 The parser is resilient to XML bomb attacks due to streaming:
 
-- **Billion laughs attack:** Entity expansion blocked by LIBXML_NONET
-- **Quadratic blowup:** No full DOM in memory, constant memory usage
-- **External entity expansion:** Network access disabled
+- **Billion laughs attack:** Entity references are not substituted, libxml2
+  stops at its entity amplification limit, and a unit that references a
+  declared entity is rejected
+- **Quadratic blowup:** Same mechanism; no entity text is copied into a unit
+- **Huge text nodes:** A text node above 10,000,000 bytes is rejected with
+  code 1700000002
 
-**Result:** DoS via malicious XLIFF files is effectively mitigated.
+**Result:** Entity expansion cannot multiply the input. The whole document is
+held in memory as the input string, so bound the input size before parsing,
+as the upload example above does.
 
 SSRF Prevention
 ---------------
 
-LIBXML_NONET prevents Server-Side Request Forgery via XXE:
+External entities and external DTDs are never loaded, whatever their URI
+scheme (``http://``, ``ftp://``, ``file://``, ``php://``). ``LIBXML_NONET``
+blocks network access in addition:
 
-- Blocks HTTP/HTTPS external entity loading
-- Blocks FTP external entity loading
-- Blocks PHP wrapper access (php://, file://, data://)
-- Prevents internal network probing
+- No HTTP/HTTPS or FTP request during parsing
+- No internal network probing
 
 **Result:** Internal network resources protected from XXE-based SSRF.
 
@@ -376,7 +384,10 @@ If you discover a security vulnerability in the XLIFF Streaming Parser extension
 
 **DO NOT** open a public GitHub issue.
 
-**Contact:** security@netresearch.de
+**Contact:** use GitHub's private vulnerability reporting
+(`Report a vulnerability
+<https://github.com/netresearch/t3x-nr-xliff-streaming/security/advisories/new>`__),
+as described in ``SECURITY.md``.
 
 **Include:**
    - Description of the vulnerability
@@ -413,8 +424,6 @@ The extension follows security best practices:
    - CWE-918: Server-Side Request Forgery (SSRF)
 
 **TYPO3 Security:**
-   - Follows TYPO3 Security Guidelines
-   - Uses TYPO3 security APIs
    - No known CVEs
 
 Frequently Asked Questions
@@ -436,8 +445,10 @@ A: No. LIBXML_NONET has negligible performance impact and is recommended
 
 **Q: Are there any known XXE bypasses?**
 
-A: No known bypasses exist when LIBXML_NONET is properly enforced.
-   The extension includes comprehensive test coverage to verify protection.
+A: None is known. The parser never enables entity substitution or DTD
+   loading and always passes LIBXML_NONET;
+   ``Tests/Unit/Parser/XliffStreamingParserXXETest.php`` fails when that
+   changes.
 
 **Q: What if I need to process XLIFF with external entities?**
 
