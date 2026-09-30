@@ -24,10 +24,24 @@ final class XliffStreamingParserXXETest extends UnitTestCase
 {
     private XliffStreamingParser $xliffStreamingParser;
 
+    /**
+     * @var list<string>
+     */
+    private array $temporaryFiles = [];
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->xliffStreamingParser = new XliffStreamingParser();
+    }
+
+    protected function tearDown(): void
+    {
+        foreach ($this->temporaryFiles as $temporaryFile) {
+            @unlink($temporaryFile);
+        }
+
+        parent::tearDown();
     }
 
     #[Test]
@@ -126,6 +140,51 @@ XML;
     }
 
     #[Test]
+    public function externalDtdSubsetIsNotLoaded(): void
+    {
+        $dtd = $this->createTemporaryFile('<!ENTITY canary "LOADED-FROM-DTD">');
+
+        $xliff = '<?xml version="1.0"?><!DOCTYPE xliff SYSTEM "file://' . $dtd . '">'
+            . '<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2"><file><body>'
+            . '<trans-unit id="dtd.test"><source>&canary;</source></trans-unit></body></file></xliff>';
+
+        // The DTD is never read, so &canary; stays undefined and the unit is rejected.
+        $this->expectException(InvalidXliffException::class);
+        $this->expectExceptionCode(1700000003);
+
+        $this->parseWithoutLibxmlWarnings($xliff);
+    }
+
+    #[Test]
+    public function externalParameterEntityIsNotLoaded(): void
+    {
+        $dtd = $this->createTemporaryFile('<!ENTITY canary "LOADED-FROM-PARAMETER-ENTITY">');
+
+        $xliff = '<?xml version="1.0"?><!DOCTYPE xliff [<!ENTITY % ext SYSTEM "file://' . $dtd . '"> %ext;]>'
+            . '<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2"><file><body>'
+            . '<trans-unit id="pe.test"><source>&canary;</source></trans-unit></body></file></xliff>';
+
+        // libxml2 2.9 ends the document without a unit, 2.13 rejects the unit;
+        // in both cases the file content never reaches a yielded unit.
+        $sources = array_column($this->collectUnitsOrInvalidXliff($xliff), 'source');
+
+        self::assertSame([], array_filter($sources, static fn(string $source): bool => str_contains($source, 'LOADED-FROM')));
+    }
+
+    #[Test]
+    public function textNodeAboveLibxmlLimitIsRejected(): void
+    {
+        // Without LIBXML_PARSEHUGE libxml2 caps a single text node at 10,000,000 bytes.
+        $xliff = '<?xml version="1.0"?><xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2"><file><body>'
+            . '<trans-unit id="huge"><source>' . str_repeat('A', 10_000_001) . '</source></trans-unit></body></file></xliff>';
+
+        $this->expectException(InvalidXliffException::class);
+        $this->expectExceptionCode(1700000002);
+
+        $this->parseWithoutLibxmlWarnings($xliff);
+    }
+
+    #[Test]
     public function xxePayloadWithPhpWrapperIsBlocked(): void
     {
         $phpWrapper = <<<'XML'
@@ -175,5 +234,48 @@ XML;
         $this->expectExceptionCode(1700000003);
 
         iterator_to_array($this->xliffStreamingParser->parseTransUnits($ssrfPayload));
+    }
+
+    /**
+     * @return list<array{id: string, source: string, target: string|null, line: int}>
+     */
+    private function collectUnitsOrInvalidXliff(string $xliff): array
+    {
+        try {
+            return $this->parseWithoutLibxmlWarnings($xliff);
+        } catch (InvalidXliffException) {
+            // Rejection is an accepted outcome.
+            return [];
+        }
+    }
+
+    /**
+     * libxml2 reports parse errors as E_WARNING from XMLReader; keep them out of the test output.
+     *
+     * @return list<array{id: string, source: string, target: string|null, line: int}>
+     */
+    private function parseWithoutLibxmlWarnings(string $xliff): array
+    {
+        $units = [];
+        set_error_handler(static fn(): bool => true, E_WARNING);
+        try {
+            foreach ($this->xliffStreamingParser->parseTransUnits($xliff) as $unit) {
+                $units[] = $unit;
+            }
+        } finally {
+            restore_error_handler();
+        }
+
+        return $units;
+    }
+
+    private function createTemporaryFile(string $content): string
+    {
+        $path = tempnam(sys_get_temp_dir(), 'xliff-xxe-');
+        self::assertIsString($path);
+        file_put_contents($path, $content);
+        $this->temporaryFiles[] = $path;
+
+        return $path;
     }
 }
