@@ -13,6 +13,7 @@ use Netresearch\NrXliffStreaming\Exception\InvalidXliffException;
 use Netresearch\NrXliffStreaming\Parser\XliffStreamingParser;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
@@ -43,7 +44,8 @@ final class XliffStreamingParserXXETest extends UnitTestCase
     protected function tearDown(): void
     {
         foreach ($this->temporaryFiles as $temporaryFile) {
-            @unlink($temporaryFile);
+            // GeneralUtility::rmdir() removes a plain file as well.
+            GeneralUtility::rmdir($temporaryFile);
         }
 
         parent::tearDown();
