@@ -17,3 +17,12 @@
 /AGENTS.md export-ignore
 /CONFORMANCE_REPORT.md export-ignore
 /COVERAGE.md export-ignore
+# Unanchored: the scoped copies in Classes/, Tests/, Documentation/ and .ddev/
+AGENTS.md export-ignore
+CLAUDE.md export-ignore
+/docs export-ignore
+/.bestpractices.json export-ignore
+/.styleci.yml export-ignore
+/crowdin.yml export-ignore
+/renovate.json export-ignore
+/Makefile export-ignore
