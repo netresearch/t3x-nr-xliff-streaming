@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: GPL-2.0-or-later -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
 # TYPO3 Extension: XLIFF Streaming Parser
 
 High-performance streaming XLIFF parser for TYPO3 supporting large translation files (10MB+) with constant memory footprint.

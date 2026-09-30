@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: GPL-2.0-or-later -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
 # Security assurance
 
 This document argues why `nr_xliff_streaming` meets its security requirements. Every claim names the file, method or test that carries it. Methods without a file name are in `Classes/Parser/XliffStreamingParser.php`. For reporting a vulnerability see [SECURITY.md](../SECURITY.md).

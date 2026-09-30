@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/*
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ * SPDX-FileCopyrightText: Netresearch DTT GmbH
+ */
+
 namespace Netresearch\NrXliffStreaming\Tests\Unit\Parser;
 
 use Netresearch\NrXliffStreaming\Exception\InvalidXliffException;

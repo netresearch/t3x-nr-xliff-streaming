@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: GPL-2.0-or-later -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
 # Architecture
 
 Agent-facing component map for `nr_xliff_streaming`. For user-facing documentation see `Documentation/` (rendered at https://docs.typo3.org/p/netresearch/nr-xliff-streaming/main/en-us/).
