@@ -42,6 +42,10 @@ Use [GitHub Security Advisories](https://github.com/netresearch/t3x-nr-xliff-str
 
 This policy covers the `nr_xliff_streaming` TYPO3 extension code. For vulnerabilities in dependencies or TYPO3 core, please report to the respective upstream projects.
 
+## Security Design
+
+The threat model, trust boundaries and the evidence for the extension's XML hardening are in [docs/SECURITY-ASSURANCE.md](docs/SECURITY-ASSURANCE.md).
+
 ## Safe Harbor
 
 We consider security research conducted in good faith to be authorized. We will not pursue legal action against researchers who follow responsible disclosure practices.
