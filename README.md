@@ -111,6 +111,23 @@ composer fix
 composer analyse
 ```
 
+## Governance and policies
+
+This extension follows the organisation-wide Netresearch policies:
+
+- [Governance](https://github.com/netresearch/.github/blob/main/GOVERNANCE.md): ownership, roles, how decisions are made and conflicts resolved.
+- [Roadmap](https://github.com/netresearch/.github/blob/main/ROADMAP.md): planned and excluded work for the next twelve months.
+- [Handling of dependency and code analysis findings](https://github.com/netresearch/.github/blob/main/SECURITY.md#handling-of-dependency-and-code-analysis-findings): which vulnerability, licence and static-analysis findings must be fixed, by when, and how exceptions are recorded.
+- [Secret management](https://github.com/netresearch/.github/blob/main/SECURITY.md#secret-management): where CI and release credentials are stored, who may use them, how committed secrets are detected, and when secrets are rotated.
+- [Access roster](https://github.com/netresearch/.github/blob/main/docs/access-roster.md): the people and teams with administrative or write access to this repository.
+
+Checks that run on every pull request in this repository:
+
+- `.github/workflows/checks.yml`: Composer Audit (fails on an advisory for an installed package) and Opengrep SAST (fails on findings of severity WARNING or higher), both through `typo3-ci-workflows`' `security.yml`; Dependency Review (fails on newly added dependencies with a vulnerability of severity high or higher); PHP License Audit (`license-check.yml`, fails on an SSPL or BSL licensed Composer dependency); CodeQL with `languages: auto`, which here analyses the workflow files only, because the repository contains no JavaScript or Go (PHPStan and Opengrep cover the PHP code); Betterleaks secret scanning; zizmor for the workflow files; the pull request quality check. The fuzz job finds no fuzz suite in `Build/phpunit/` and is skipped.
+- `.github/workflows/ci.yml`: PHP lint, code style (`.php-cs-fixer.php`), PHPStan (`phpstan.neon`), Rector, the unit suite across PHP 8.2 to 8.5 and TYPO3 13.4 and 14.3, and the documentation rendering of `Documentation/`.
+- `.github/workflows/harness-verify.yml`: `Build/Scripts/verify-harness.sh`.
+- `.github/workflows/check-template-drift.yml`: the `.github/` files that the `typo3-extension` template in `netresearch/.github` manages, except those `.github/template.yaml` lists as intentional drift.
+
 ## Credits
 
 Developed by [Netresearch DTT GmbH](https://www.netresearch.de)
