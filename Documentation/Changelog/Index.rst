@@ -1,3 +1,6 @@
+.. SPDX-License-Identifier: CC-BY-4.0
+.. SPDX-FileCopyrightText: Netresearch DTT GmbH
+
 .. include:: /Includes.rst.txt
 
 .. _changelog:
@@ -23,7 +26,7 @@ Initial Release
 
 * High-performance streaming XLIFF parser using XMLReader
 * Support for XLIFF 1.0, 1.2, and 2.0 formats
-* Generator pattern for constant memory footprint
+* Generator pattern that builds one translation unit at a time
 * Comprehensive XXE attack protection (CWE-611)
 * Billion Laughs DoS attack mitigation
 * Full dependency injection support
@@ -36,10 +39,13 @@ Initial Release
 
 **Performance**
 
-* 30x memory reduction compared to SimpleXML
-* 60x speed improvement for large files
-* Constant memory usage independent of file size
-* Tested with files up to 108MB
+* Lower memory than SimpleXML: one unit tree at a time instead of a tree of
+  the whole document
+
+.. note::
+   The 1.0.0 release notes claimed a 30x memory reduction, a 60x speed-up and
+   memory independent of the file size. Those figures were not reproducible;
+   see :ref:`performance` for measured values.
 
 **Security**
 

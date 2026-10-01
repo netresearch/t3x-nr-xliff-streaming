@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# SPDX-FileCopyrightText: Netresearch DTT GmbH
+
 # Auto detect text files and perform LF normalization
 * text=auto
 
@@ -17,3 +20,12 @@
 /AGENTS.md export-ignore
 /CONFORMANCE_REPORT.md export-ignore
 /COVERAGE.md export-ignore
+# Unanchored: the scoped copies in Classes/, Tests/, Documentation/ and .ddev/
+AGENTS.md export-ignore
+CLAUDE.md export-ignore
+/docs export-ignore
+/.bestpractices.json export-ignore
+/.styleci.yml export-ignore
+/crowdin.yml export-ignore
+/renovate.json export-ignore
+/Makefile export-ignore

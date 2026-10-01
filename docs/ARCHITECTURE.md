@@ -1,10 +1,12 @@
+<!-- SPDX-License-Identifier: GPL-2.0-or-later -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
 # Architecture
 
 Agent-facing component map for `nr_xliff_streaming`. For user-facing documentation see `Documentation/` (rendered at https://docs.typo3.org/p/netresearch/nr-xliff-streaming/main/en-us/).
 
 ## System Overview
 
-`nr_xliff_streaming` is a TYPO3 extension providing a high-performance streaming XLIFF parser for large translation files. It reads XLIFF 1.0, 1.2, and 2.0 content through PHP's `XMLReader` and yields trans-units one at a time via a `Generator`, keeping memory usage constant regardless of file size. All XML parsing uses `LIBXML_NONET` to block XXE/SSRF vectors.
+`nr_xliff_streaming` is a TYPO3 extension providing a high-performance streaming XLIFF parser for large translation files. It reads XLIFF 1.0, 1.2, and 2.0 content through PHP's `XMLReader` and yields trans-units one at a time via a `Generator`, building a tree for one unit at a time; memory still grows with the input, which is passed as a string (measurements in `Documentation/Performance/`). All XML parsing uses `LIBXML_NONET` to block XXE/SSRF vectors.
 
 ## Components
 
@@ -24,7 +26,7 @@ Agent-facing component map for `nr_xliff_streaming`. For user-facing documentati
 ## Data Flow
 
 1. Caller obtains `XliffStreamingParser` (via DI or `new`) and passes XLIFF content as a string to `parseTransUnits()`.
-2. `XMLReader::XML($xmlContent, 'UTF-8', LIBXML_NONET)` opens a streaming cursor; malformed XML raises `InvalidXliffException` (1700000001).
+2. `XMLReader::XML($xmlContent, 'UTF-8', LIBXML_NONET)` opens a streaming cursor; empty input raises `InvalidXliffException` (1700000001). Malformed XML raises no exception: libxml2 emits an E_WARNING from `XMLReader::read()` and iteration ends.
 3. The reader walks the document; each `trans-unit` (XLIFF 1.x) / segment (XLIFF 2.0) element is expanded to a `SimpleXMLElement` and validated (`id` attribute, `<source>` element required).
 4. Each unit is yielded as `array{id: string, source: string, target: string|null, line: int}` — the caller iterates the `Generator`, so only one unit is materialized at a time.
 
@@ -38,6 +40,6 @@ No `Tests/Architecture/` (phpat) suite exists; the following is derived from the
 
 ## Key Decisions
 
-- Streaming via `XMLReader` + `Generator` instead of `SimpleXML` for constant memory: rationale and measurements in `PERFORMANCE_BENCHMARK.md` and `Documentation/Performance/`.
+- Streaming via `XMLReader` + `Generator` instead of `SimpleXML` for lower memory: measurements in `Documentation/Performance/`.
 - Security posture (`LIBXML_NONET`, XXE/Billion-Laughs/SSRF protection): `SECURITY.md`, `Documentation/Security/`, enforced by `Tests/Unit/Parser/XliffStreamingParserXXETest.php`.
 - Coding and testing conventions: `AGENTS.md` (root) and the scoped `AGENTS.md` files in `Classes/`, `Tests/`, `Documentation/`, `.ddev/`.

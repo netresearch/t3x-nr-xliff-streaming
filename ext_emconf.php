@@ -1,8 +1,13 @@
 <?php
 
+/*
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ * SPDX-FileCopyrightText: Netresearch DTT GmbH
+ */
+
 $EM_CONF[$_EXTKEY] = [
     'title' => 'XLIFF Streaming Parser',
-    'description' => 'High-performance streaming XLIFF parser for TYPO3 supporting large translation files (10MB+) with constant memory footprint. Uses XMLReader for 30x memory reduction and 60x speed improvement over SimpleXML.',
+    'description' => 'Streaming XLIFF parser for TYPO3: reads XLIFF 1.0, 1.2 and 2.0 with XMLReader one translation unit at a time instead of building a SimpleXML tree of the whole document.',
     'category' => 'be',
     'author' => 'Netresearch DTT GmbH',
     'author_email' => 'info@netresearch.de',

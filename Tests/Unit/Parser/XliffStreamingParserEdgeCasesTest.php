@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/*
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ * SPDX-FileCopyrightText: Netresearch DTT GmbH
+ */
+
 namespace Netresearch\NrXliffStreaming\Tests\Unit\Parser;
 
 use Netresearch\NrXliffStreaming\Exception\InvalidXliffException;
@@ -24,6 +29,17 @@ final class XliffStreamingParserEdgeCasesTest extends UnitTestCase
     {
         parent::setUp();
         $this->xliffStreamingParser = new XliffStreamingParser();
+    }
+
+    #[Test]
+    public function throwsInvalidXliffExceptionForEmptyInput(): void
+    {
+        // XMLReader::XML() throws a ValueError for an empty string; a caller
+        // that catches InvalidXliffException per the interface must see that.
+        $this->expectException(InvalidXliffException::class);
+        $this->expectExceptionCode(1700000001);
+
+        iterator_to_array($this->xliffStreamingParser->parseTransUnits(''));
     }
 
     #[Test]

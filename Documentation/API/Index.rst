@@ -1,3 +1,6 @@
+.. SPDX-License-Identifier: CC-BY-4.0
+.. SPDX-FileCopyrightText: Netresearch DTT GmbH
+
 .. include:: /Includes.rst.txt
 
 .. _api:
@@ -15,15 +18,14 @@ XliffStreamingParser
 
    High-performance streaming XLIFF parser using XMLReader.
 
-   This parser uses XMLReader to stream through XLIFF files node-by-node,
-   maintaining constant memory usage (~30MB) regardless of file size.
-   It provides 60x speed improvement and 30x memory reduction compared
-   to SimpleXML-based parsing.
+   This parser uses XMLReader to stream through XLIFF documents node by node
+   and builds a tree for one translation unit at a time.
 
-   **Performance:**
-      - Memory: Constant ~30MB (vs 900MB with SimpleXML for 108MB file)
-      - Speed: 90 seconds (vs 90 minutes with SimpleXML for 100MB file)
-      - Efficiency: 30x memory reduction, 60x speed improvement
+   **Performance** (see :ref:`performance`):
+      - Memory: parsing adds about the input size to the process, SimpleXML
+        about eight times the input size
+      - Speed: slower than a single SimpleXML XPath query, because each unit
+        is parsed a second time on its own
 
    **Supported XLIFF Versions:**
       - XLIFF 1.0 (no namespace)
@@ -106,20 +108,31 @@ InvalidXliffException
    Extends: ``\\RuntimeException``
 
    This exception is thrown when:
-   - XML content is malformed or invalid
+   - The input is empty
+   - A unit cannot be read or parsed on its own
    - Required ``id`` attribute is missing on trans-unit
    - Required ``<source>`` element is missing
 
    **Error Codes:**
 
    1700000001
-      Failed to parse XML content (malformed XML syntax)
+      The input is empty, or XMLReader could not open it. Malformed XML does
+      not raise this code: libxml2 reports it as a PHP warning and the parser
+      stops yielding units.
 
    1700000002
-      Missing required ``id`` attribute on trans-unit element
+      A unit could not be expanded or read, for example because a text node
+      exceeds libxml2's limit of 10,000,000 bytes
 
    1700000003
-      Missing required ``<source>`` element in trans-unit
+      The unit's XML cannot be parsed on its own, which happens when it
+      references an entity other than the five predefined XML entities
+
+   1700000004
+      Missing required ``id`` attribute on trans-unit
+
+   1700000005
+      Missing or empty ``<source>`` element
 
    **Example:**
 
@@ -133,9 +146,8 @@ InvalidXliffException
           }
       } catch (InvalidXliffException $e) {
           match ($e->getCode()) {
-              1700000001 => $this->handleMalformedXml($e),
-              1700000002 => $this->handleMissingId($e),
-              1700000003 => $this->handleMissingSource($e),
+              1700000004 => $this->handleMissingId($e),
+              1700000005 => $this->handleMissingSource($e),
               default => $this->handleGenericError($e),
           };
       }
@@ -355,6 +367,8 @@ Error Codes
 .. code-block:: php
    :caption: Exception error codes
 
-   1700000001  // Failed to parse XML content
-   1700000002  // Missing required 'id' attribute
-   1700000003  // Missing required '<source>' element
+   1700000001  // Input is empty or cannot be opened
+   1700000002  // Unit cannot be expanded or read
+   1700000003  // Unit XML cannot be parsed on its own
+   1700000004  // Missing required 'id' attribute
+   1700000005  // Missing or empty '<source>' element

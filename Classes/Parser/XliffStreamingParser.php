@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/*
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ * SPDX-FileCopyrightText: Netresearch DTT GmbH
+ */
+
 namespace Netresearch\NrXliffStreaming\Parser;
 
 use Generator;
@@ -14,8 +19,9 @@ use function is_string;
 /**
  * High-performance streaming XLIFF parser supporting XLIFF 1.0, 1.2, and 2.0
  *
- * Uses XMLReader for constant memory footprint regardless of file size.
- * Provides 30x memory reduction and 60x speed improvement over SimpleXML for large files.
+ * Uses XMLReader and builds a tree for one translation unit at a time. The
+ * document itself is passed as a string, so memory grows with the input size;
+ * see Documentation/Performance for measurements.
  *
  * Supported XLIFF versions:
  * - XLIFF 1.0: No namespace
@@ -39,11 +45,11 @@ final class XliffStreamingParser implements XliffParserInterface
     /**
      * Parse XLIFF trans-units using streaming XMLReader
      *
-     * Generator pattern yields one trans-unit at a time with constant memory usage.
+     * Generator pattern yields one trans-unit at a time.
      * Each trans-unit is converted to SimpleXMLElement for easy data extraction.
      *
-     * Memory usage: ~30MB constant regardless of file size (vs 900MB for 108MB with SimpleXML)
-     * Speed: 60x faster than SimpleXML for large files (90 seconds vs 90 minutes)
+     * Memory: parsing adds about the input size (libxml2's copy of the buffer),
+     * against about eight times the input size for a SimpleXML tree.
      *
      * @param string $xmlContent XLIFF file content
      * @return Generator<array{id: string, source: string, target: string|null, line: int}>
@@ -51,6 +57,12 @@ final class XliffStreamingParser implements XliffParserInterface
      */
     public function parseTransUnits(string $xmlContent): Generator
     {
+        // XMLReader::XML() throws a ValueError for an empty string, which is
+        // not part of this method's contract.
+        if ($xmlContent === '') {
+            throw new InvalidXliffException('Failed to parse XML content: input is empty', 1700000001);
+        }
+
         // XMLReader::XML() is static as of PHP 8.0 and returns the reader it
         // set up, so take it from the return value instead of calling it on a
         // separately constructed instance.

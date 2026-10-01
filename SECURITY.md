@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: GPL-2.0-or-later -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
 # Security Policy
 
 ## Supported Versions
@@ -41,6 +43,10 @@ Use [GitHub Security Advisories](https://github.com/netresearch/t3x-nr-xliff-str
 ### Scope
 
 This policy covers the `nr_xliff_streaming` TYPO3 extension code. For vulnerabilities in dependencies or TYPO3 core, please report to the respective upstream projects.
+
+## Security Design
+
+The threat model, trust boundaries and the evidence for the extension's XML hardening are in [docs/SECURITY-ASSURANCE.md](https://github.com/netresearch/t3x-nr-xliff-streaming/blob/main/docs/SECURITY-ASSURANCE.md).
 
 ## Safe Harbor
 

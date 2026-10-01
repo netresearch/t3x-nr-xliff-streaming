@@ -1,3 +1,6 @@
+.. SPDX-License-Identifier: CC-BY-4.0
+.. SPDX-FileCopyrightText: Netresearch DTT GmbH
+
 .. include:: /Includes.rst.txt
 
 .. _performance:
@@ -9,241 +12,87 @@ Performance
 Overview
 ========
 
-The XLIFF Streaming Parser provides dramatic performance improvements over
-traditional SimpleXML-based parsing through XMLReader streaming technology.
+The parser reads the document with XMLReader and builds a tree for one
+translation unit at a time. SimpleXML builds a tree of the whole document.
+Streaming therefore needs far less memory. It is not faster, and its memory use
+is not independent of the file size, because ``parseTransUnits()`` takes the
+whole document as a string.
 
-Performance Comparison
-======================
+Measured Results
+================
 
-Real-World Benchmarks
+Measured on PHP 8.5.10 with libxml2 2.9.14 on generated XLIFF 1.2 documents
+(one ``<trans-unit>`` with ``<source>`` and ``<target>`` per line). The
+streaming column iterates ``parseTransUnits()``; the SimpleXML column runs
+``simplexml_load_string()`` and one ``//trans-unit`` XPath query and reads id,
+source and target of every unit. "Added memory" is the growth of the process's
+resident memory (``VmHWM`` after resetting it, minus ``VmRSS`` before) while
+parsing, on top of the input string the caller already holds.
+
+.. list-table:: Streaming parser and SimpleXML
+   :header-rows: 1
+
+   * - Input size
+     - Units
+     - Streaming added memory
+     - SimpleXML added memory
+     - Streaming time
+     - SimpleXML time
+   * - 1.7 MB
+     - 10,000
+     - 2.4 MB
+     - 13.4 MB
+     - 0.11 s
+     - 0.01 s
+   * - 16.9 MB
+     - 100,000
+     - 17.4 MB
+     - 131.6 MB
+     - 1.14 s
+     - 0.14 s
+   * - 56.6 MB
+     - 330,000
+     - 57.5 MB
+     - 439.6 MB
+     - 3.96 s
+     - 0.42 s
+
+What the numbers mean
 ---------------------
 
-Benchmarks from production TYPO3 environments with large translation files:
+- **Memory:** parsing adds about the input size, because libxml2 keeps its own
+  copy of the input buffer. Together with the caller's string, peak memory is
+  about twice the input size plus a constant. SimpleXML adds about eight times
+  the input size.
+- **PHP's view:** ``memory_get_peak_usage()`` sees only the input string plus
+  less than 1 MB. libxml2 allocates outside PHP's memory manager, so
+  ``memory_limit`` does not count its copy.
+- **Speed:** a single SimpleXML XPath query was 8 to 11 times faster. The
+  streaming parser parses each unit a second time on its own
+  (``readOuterXml()`` and ``simplexml_load_string()``).
+- **Scaling:** time and memory grew linearly with the input size.
 
-.. list-table:: Performance Comparison
-   :header-rows: 1
-   :widths: 20 20 20 20 20
+Earlier versions of this page reported a constant memory footprint of about
+30 MB, a 30x memory reduction and a 60x speed-up (90 minutes against 90
+seconds for a 100 MB file). Nothing in this repository reproduces those
+figures, and the measurement above contradicts them, so they were removed.
 
-   * - File Size
-     - SimpleXML Time
-     - Streaming Time
-     - SimpleXML Memory
-     - Streaming Memory
-   * - 10MB
-     - 5 minutes
-     - 5 seconds
-     - 80-90MB
-     - 30MB
-   * - 50MB
-     - 25 minutes
-     - 25 seconds
-     - 400-450MB
-     - 30MB
-   * - 100MB
-     - 90 minutes
-     - 90 seconds
-     - 800-900MB
-     - 30MB
-   * - 108MB (actual)
-     - 90 minutes
-     - 90 seconds
-     - 900MB
-     - 30MB
-
-Performance Metrics
--------------------
-
-**Speed Improvement:**
-   - **60x faster** for large files (100MB+)
-   - **Linear scaling** with file size
-   - **Consistent performance** regardless of file size
-
-**Memory Efficiency:**
-   - **30x memory reduction** for large files
-   - **Constant memory footprint** (~30MB)
-   - **No memory scaling** with file size
-
-**Throughput:**
-   - Processes ~1MB/second of XLIFF data
-   - Handles 10,000+ translation units/second
-   - Suitable for batch processing large translation memories
-
-Memory Usage Analysis
-=====================
-
-SimpleXML Memory Pattern
--------------------------
-
-Traditional SimpleXML parsing loads the entire XML document into memory:
-
-.. code-block:: text
-
-   File Size:  10MB     50MB     100MB    108MB
-   Memory:     80MB     400MB    800MB    900MB
-   Ratio:      8x       8x       8x       8.3x
-
-**Problem:** Memory usage scales 8-9x with file size, causing:
-
-- Memory limit exhaustion (PHP defaults: 128MB-256MB)
-- Server resource contention with concurrent uploads
-- Swap usage and performance degradation
-- Out-of-memory crashes on large files
-
-Streaming Memory Pattern
--------------------------
-
-XMLReader streaming maintains constant memory usage:
-
-.. code-block:: text
-
-   File Size:  10MB     50MB     100MB    108MB
-   Memory:     30MB     30MB     30MB     30MB
-   Ratio:      3x       0.6x     0.3x     0.28x
-
-**Solution:** Constant ~30MB memory footprint:
-
-- No memory scaling with file size
-- Predictable resource usage
-- Supports unlimited file sizes
-- No memory limit configuration needed
-
-Memory Distribution
---------------------
-
-Typical memory usage breakdown for streaming parser:
-
-.. code-block:: text
-
-   Component                          Memory
-   ─────────────────────────────────────────
-   XMLReader buffer                   ~5MB
-   SimpleXMLElement conversion        ~10MB
-   PHP runtime overhead               ~10MB
-   TYPO3 framework baseline           ~5MB
-   ─────────────────────────────────────────
-   Total constant footprint           ~30MB
-
-Speed Analysis
-==============
-
-Why Streaming is Faster
-------------------------
+Why streaming needs less memory
+===============================
 
 **SimpleXML approach:**
 
-1. Parse entire XML into DOM tree (slow)
-2. Build complete object hierarchy (memory intensive)
-3. Query DOM with XPath (overhead)
-4. Iterate through results
+1. Parse the entire document into a tree
+2. Query the tree with XPath
+3. Iterate through the results
 
 **Streaming approach:**
 
-1. Stream through XML node-by-node (fast)
-2. Process only trans-unit elements (selective)
-3. Skip unnecessary XML structure (efficient)
-4. Yield results immediately (no buffering)
+1. Move a cursor through the document node by node
+2. Build a tree only for the current ``<trans-unit>`` or ``<unit>``
+3. Yield the unit and discard its tree
 
-Processing Time Breakdown
---------------------------
-
-For a 100MB XLIFF file:
-
-.. list-table:: Time Breakdown (SimpleXML)
-   :header-rows: 1
-   :widths: 40 30 30
-
-   * - Phase
-     - Time
-     - % of Total
-   * - XML parsing (DOM build)
-     - 60 minutes
-     - 67%
-   * - XPath queries
-     - 20 minutes
-     - 22%
-   * - Data extraction
-     - 10 minutes
-     - 11%
-   * - **Total**
-     - **90 minutes**
-     - **100%**
-
-.. list-table:: Time Breakdown (Streaming)
-   :header-rows: 1
-   :widths: 40 30 30
-
-   * - Phase
-     - Time
-     - % of Total
-   * - XMLReader streaming
-     - 70 seconds
-     - 78%
-   * - SimpleXML conversion (per unit)
-     - 15 seconds
-     - 17%
-   * - Data extraction
-     - 5 seconds
-     - 5%
-   * - **Total**
-     - **90 seconds**
-     - **100%**
-
-Scalability
-===========
-
-File Size Scaling
------------------
-
-Performance remains linear with file size:
-
-.. code-block:: text
-
-   File Size    Trans-Units    Processing Time    Memory
-   ────────────────────────────────────────────────────────
-   1MB          1,000          1 second           30MB
-   10MB         10,000         10 seconds         30MB
-   100MB        100,000        90 seconds         30MB
-   1GB          1,000,000      15 minutes         30MB
-   10GB         10,000,000     2.5 hours          30MB
-
-**Key Point:** Memory usage remains constant at 30MB regardless of file size.
-
-Concurrent Processing
----------------------
-
-With constant memory usage, servers can handle concurrent uploads:
-
-.. list-table:: Concurrent Upload Capacity
-   :header-rows: 1
-   :widths: 30 35 35
-
-   * - Available Memory
-     - SimpleXML Concurrent Uploads
-     - Streaming Concurrent Uploads
-   * - 512MB
-     - 1 upload (100MB file)
-     - 17 uploads (any size)
-   * - 1GB
-     - 2 uploads
-     - 34 uploads
-   * - 2GB
-     - 4 uploads
-     - 68 uploads
-
-Real-World Impact
------------------
-
-**Before (SimpleXML):**
-   - Translators could not import translation memories >10MB
-   - Batch imports required manual file splitting
-   - Upload timeouts common (5-10 minute limits)
-   - Server resources exhausted during imports
-
-**After (Streaming):**
-   - Translation memories of any size supported
-   - Batch imports process smoothly
-   - Uploads complete in seconds
-   - Predictable server resource usage
+.. _performance-optimization:
 
 Optimization Tips
 =================
@@ -424,13 +273,14 @@ Frequently Asked Questions
 
 **Q: Will streaming help with small files (<1MB)?**
 
-A: Yes! Even small files benefit from 6x speed improvement. The overhead
-   of XMLReader is negligible compared to SimpleXML DOM building.
+A: Not in speed: SimpleXML was faster at every size measured above. The
+   memory saving is small in absolute terms for small files.
 
 **Q: Can I process files larger than PHP's memory limit?**
 
-A: Yes. With constant 30MB usage, you can process any file size regardless
-   of PHP memory_limit setting (as long as ≥128MB).
+A: No. The document is passed as a string, and that string counts against
+   ``memory_limit``. libxml2's copy of it does not count against
+   ``memory_limit`` but does occupy process memory.
 
 **Q: Does streaming work with compressed XLIFF files?**
 
@@ -445,8 +295,9 @@ A: Decompress first, then parse:
 
 **Q: How does performance compare to other XLIFF libraries?**
 
-A: XMLReader streaming is the fastest approach for large files in PHP.
-   Libraries using DOM or SimpleXML will always have 8-9x memory overhead.
+A: No comparison with other libraries has been measured. Parsers that
+   build a DOM or SimpleXML tree of the whole document need memory of the
+   order measured for SimpleXML above.
 
 Next Steps
 ==========

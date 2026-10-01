@@ -1,3 +1,6 @@
+.. SPDX-License-Identifier: CC-BY-4.0
+.. SPDX-FileCopyrightText: Netresearch DTT GmbH
+
 .. include:: /Includes.rst.txt
 
 .. _start:
@@ -31,8 +34,9 @@ XLIFF Streaming Parser
 
 ----
 
-High-performance streaming XLIFF parser for TYPO3 supporting large translation files
-(10MB+) with constant memory footprint.
+Streaming XLIFF parser for TYPO3: reads XLIFF 1.0, 1.2 and 2.0 with XMLReader
+one translation unit at a time instead of building a SimpleXML tree of the whole
+document.
 
 ----
 

@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/*
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ * SPDX-FileCopyrightText: Netresearch DTT GmbH
+ */
+
 namespace Netresearch\NrXliffStreaming\Tests\Performance;
 
 use Generator;
@@ -13,10 +18,9 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 /**
  * Performance benchmark tests for XliffStreamingParser
  *
- * Validates performance claims:
- * - 30x memory reduction vs SimpleXML
- * - 60x speed improvement vs SimpleXML
- * - Constant memory footprint
+ * Checks upper bounds for parse time and for memory as PHP's memory
+ * manager reports it (memory_get_usage()), which excludes libxml2's
+ * allocations. No comparison with SimpleXML is made here.
  *
  * @author Netresearch DTT GmbH
  */

@@ -1,3 +1,6 @@
+.. SPDX-License-Identifier: CC-BY-4.0
+.. SPDX-FileCopyrightText: Netresearch DTT GmbH
+
 .. include:: /Includes.rst.txt
 
 .. _integration:
@@ -206,13 +209,25 @@ The parser throws ``InvalidXliffException`` for malformed XLIFF:
 **Error Codes:**
 
 1700000001
-   Failed to parse XML content (malformed XML syntax)
+   The input is empty, or XMLReader could not open it. Malformed XML does
+   not raise this code: libxml2 reports it as a PHP warning and the parser
+   stops yielding units.
 
 1700000002
-   Missing required ``id`` attribute on trans-unit
+   A unit could not be expanded or read, for example because a text node
+   exceeds libxml2's limit of 10,000,000 bytes
 
 1700000003
-   Missing required ``<source>`` element
+   The unit's XML cannot be parsed on its own, which happens when it
+   references an entity other than the five predefined XML entities
+
+1700000004
+   Missing required ``id`` attribute on trans-unit
+
+1700000005
+   Missing or empty ``<source>`` element
+
+.. _integration-migration:
 
 Migration from SimpleXML
 =========================
@@ -248,20 +263,20 @@ Migrating from TYPO3's SimpleXML parsing to streaming:
 
 **Benefits:**
 
-- 30x memory reduction (constant ~30MB vs 900MB for large files)
-- 60x speed improvement (90 seconds vs 90 minutes)
+- Less memory: about one input size added, against about eight for SimpleXML
 - Same functional output (compatible data structure)
 - Built-in XXE protection
 
 Memory-Efficient Processing
 ============================
 
-The parser uses PHP Generators for constant memory usage:
+The parser yields one unit at a time through a PHP Generator:
 
 .. code-block:: php
    :caption: Example: Processing large files efficiently
 
-   // Memory usage remains ~30MB regardless of file size
+   // The whole document is in memory as a string; the parser adds
+   // about its size again while parsing, not a tree of all units
    $xliffContent = file_get_contents('large-100MB-file.xlf');
 
    $count = 0;
@@ -276,10 +291,9 @@ The parser uses PHP Generators for constant memory usage:
 
 **Key Points:**
 
-- File size irrelevant to memory usage
-- One trans-unit in memory at a time
-- Previous units automatically garbage collected
-- Constant ~30MB memory footprint
+- One trans-unit is built as a tree at a time
+- Previous units are garbage collected unless you keep them
+- Peak memory is about twice the file size plus a constant, not independent of it
 
 Batch Processing
 ================

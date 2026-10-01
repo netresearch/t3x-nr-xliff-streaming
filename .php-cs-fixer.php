@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/*
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ * SPDX-FileCopyrightText: Netresearch DTT GmbH
+ */
+
 $config = \TYPO3\CodingStandards\CsFixerConfig::create();
 
 // TYPO3 coding-standards fully qualifies global classes (import_classes =>

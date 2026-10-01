@@ -1,3 +1,6 @@
+.. SPDX-License-Identifier: CC-BY-4.0
+.. SPDX-FileCopyrightText: Netresearch DTT GmbH
+
 .. include:: /Includes.rst.txt
 
 .. _faq:
@@ -12,9 +15,9 @@ General Questions
 What is the XLIFF Streaming Parser?
 ------------------------------------
 
-The XLIFF Streaming Parser is a high-performance TYPO3 extension that uses XMLReader
-to parse XLIFF translation files with constant memory usage, making it ideal for
-processing large translation files (10MB+).
+The XLIFF Streaming Parser is a TYPO3 extension that uses XMLReader to parse XLIFF
+translation files one translation unit at a time, which needs far less memory
+than building a SimpleXML tree of a large file.
 
 Which XLIFF versions are supported?
 ------------------------------------
@@ -33,27 +36,26 @@ Performance Questions
 How much faster is it compared to SimpleXML?
 ---------------------------------------------
 
-For large files (100MB+), the streaming parser is approximately:
-
-* **60x faster** in processing time
-* **30x more memory efficient**
-
-For example, a 108MB file that takes 90 minutes with SimpleXML can be parsed in
-90 seconds with the streaming parser.
+It is not faster. In the measurement on :ref:`performance`, a single SimpleXML
+XPath query was 8 to 11 times faster, because the streaming parser parses
+each unit a second time on its own. It needs less memory: parsing a 56.6 MB
+document added 57.5 MB to the process, SimpleXML added 439.6 MB.
 
 See :ref:`performance` for detailed benchmarks.
 
 What is the maximum file size it can handle?
 ---------------------------------------------
 
-There is no practical file size limit. The parser uses constant memory (typically
-30MB) regardless of file size. Files over 1GB have been successfully tested.
+The limit is memory. The document is passed as a string, and libxml2 keeps a
+copy of it while parsing, so a file needs about twice its size in memory plus a
+constant. ``memory_limit`` counts the string, not libxml2's copy. A single text
+node may not exceed 10,000,000 bytes (libxml2's default limit).
 
 Does performance degrade with file size?
 -----------------------------------------
 
-Processing time scales linearly with file size, but memory usage remains constant.
-A 1GB file uses the same ~30MB of memory as a 1MB file.
+Processing time and memory both grew linearly with the file size in the
+measurement on :ref:`performance` (1.7 MB, 16.9 MB and 56.6 MB inputs).
 
 Security Questions
 ==================
@@ -159,7 +161,7 @@ See :ref:`performance-optimization` for tips.
 Memory usage is higher than expected?
 --------------------------------------
 
-The constant memory footprint is ~30MB. If you see higher usage:
+Expect about twice the file size plus a constant. If you see more:
 
 1. Ensure you're using generator iteration (``foreach``)
 2. Don't store all units in memory at once

@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: GPL-2.0-or-later -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
 # TYPO3 Extension Conformance Report
 
 **Extension:** nr_xliff_streaming (v1.0.0)

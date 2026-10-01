@@ -1,4 +1,8 @@
+<!-- SPDX-License-Identifier: GPL-2.0-or-later -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
 # XLIFF Streaming Parser - Performance Benchmark Results
+
+> **Correction (2026-09-30):** the memory statements in this report ("Constant", "<30 MB", "30x reduction") are not measurements. `Build/scripts/run-performance-benchmark.php` reads the peak of PHP's memory manager after the file is already in memory, which excludes the input string and libxml2's copy of it. Measured process memory grows with the input size; see `Documentation/Performance/Index.rst`. The SimpleXML comparison figures were not produced by that script either. The timing and throughput results below are the script's output and are kept.
 
 ## Test Environment
 

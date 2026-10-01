@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/*
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ * SPDX-FileCopyrightText: Netresearch DTT GmbH
+ */
+
 require __DIR__ . '/../../.Build/vendor/autoload.php';
 
 use Netresearch\NrXliffStreaming\Parser\XliffStreamingParser;
@@ -205,10 +210,9 @@ foreach ($results as $result) {
 }
 
 echo "\n";
-echo "Key Performance Indicators:\n";
-echo "  • Constant memory footprint regardless of file size\n";
-echo "  • Linear processing time scaling with file size\n";
-echo "  • Streaming approach prevents memory exhaustion\n";
+echo "Note: Memory Peak counts PHP's memory manager after the file was read.\n";
+echo "It excludes the input string and libxml2's copy of it, so it does not show\n";
+echo "the process's memory use (see Documentation/Performance).\n";
 echo "\n";
 
 echo "Benchmark completed successfully!\n";

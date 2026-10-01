@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: GPL-2.0-or-later -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
 <!-- Managed by agent: keep sections & order; edit content, not structure. Last updated: 2026-08-19 -->
 
 # Classes/ — PHP Backend Code
@@ -29,8 +31,7 @@ This directory contains the core parser logic and exception handling:
 - **Exception/InvalidXliffException.php** - Exception for malformed XLIFF
 
 **Design Goals:**
-- Constant memory footprint (~30MB regardless of file size)
-- 60x speed improvement over SimpleXML
+- One translation unit built as a tree at a time (memory grows with the input string, see Documentation/Performance)
 - XXE attack protection (CWE-611)
 - XLIFF 1.0, 1.2, 2.0 support
 
@@ -118,8 +119,9 @@ throw new InvalidXliffException(
 
 ### XML parsing MUST use LIBXML_NONET
 ```php
-// ✅ Correct - prevents XXE attacks
-$reader->XML($xmlContent, 'UTF-8', LIBXML_NONET);
+// ✅ Correct - no entity substitution, no DTD loading, no network
+// (never add LIBXML_NOENT, LIBXML_DTDLOAD or LIBXML_PARSEHUGE)
+$xmlReader = XMLReader::XML($xmlContent, 'UTF-8', LIBXML_NONET);
 
 simplexml_load_string(
     $xml,
@@ -127,8 +129,8 @@ simplexml_load_string(
     LIBXML_NONET  // Required!
 );
 
-// ❌ Wrong - vulnerable to XXE
-$reader->XML($xmlContent);
+// ❌ Wrong - loads external entities and DTDs
+$xmlReader = XMLReader::XML($xmlContent, 'UTF-8', LIBXML_NOENT | LIBXML_DTDLOAD);
 ```
 
 ### Protected against
@@ -159,13 +161,13 @@ Before committing code in Classes/:
 
 ## Good vs. bad examples
 
-### ✅ Good: Generator pattern with constant memory
+### ✅ Good: Generator pattern, one unit at a time
 ```php
 public function parseTransUnits(string $xmlContent): \Generator
 {
-    $reader = new \XMLReader();
+    $reader = \XMLReader::XML($xmlContent, 'UTF-8', LIBXML_NONET);
 
-    if (!$reader->XML($xmlContent, 'UTF-8', LIBXML_NONET)) {
+    if (!$reader instanceof \XMLReader) {
         throw new InvalidXliffException('Failed to parse XML', 1700000001);
     }
 
@@ -244,7 +246,7 @@ throw new \Exception('Invalid XLIFF');  // No context, no code
 ## House Rules
 
 ### Performance requirements
-- Memory usage MUST remain constant (~30MB) regardless of file size
+- Memory MUST NOT hold more than one unit tree at a time (no whole-document DOM)
 - Processing time MUST scale linearly with file size
 - Use `memory_get_peak_usage()` in tests to verify
 
