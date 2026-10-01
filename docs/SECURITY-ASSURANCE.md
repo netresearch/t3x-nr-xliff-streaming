@@ -27,7 +27,7 @@ What a user can expect:
 - Entity expansion bombs do not expand. Entity references are not substituted, and libxml2 stops the parse at its entity amplification limit. Test: `billionLaughsAttackIsMitigated`.
 - libxml2's default size limits apply, because the parser does not pass `LIBXML_PARSEHUGE`. A single text node above 10,000,000 bytes is rejected with code 1700000002. Test: `textNodeAboveLibxmlLimitIsRejected`.
 - A unit without an `id` attribute or with an empty `<source>` is rejected with codes 1700000004 and 1700000005 (`extractTransUnit()`); empty input is rejected with code 1700000001 (`parseTransUnits()`, test `throwsInvalidXliffExceptionForEmptyInput` in `Tests/Unit/Parser/XliffStreamingParserEdgeCasesTest.php`).
-- The reader is closed when iteration ends, also when the caller stops early or an exception is thrown (the `finally` block in `parseTransUnits()`).
+- The reader is closed when iteration completes or an exception is thrown (the `finally` block in `parseTransUnits()`). When the caller stops early, the generator stays suspended and the `finally` block runs only once the generator is destroyed, so a caller that keeps a reference to it also keeps the reader and its input open.
 
 What a user cannot expect:
 
