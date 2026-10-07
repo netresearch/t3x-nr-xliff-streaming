@@ -138,7 +138,10 @@ final class ParserBenchmarkTest extends UnitTestCase
         $maxMemoryDuringIteration = 0;
 
         foreach ($generator as $unit) {
-            $count++;
+            if ($unit['id'] !== '') {
+                ++$count;
+            }
+
             $currentMemory = memory_get_usage() - $memoryBefore;
             if ($currentMemory > $maxMemoryDuringIteration) {
                 $maxMemoryDuringIteration = $currentMemory;
