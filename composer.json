@@ -1,7 +1,7 @@
 {
     "name": "netresearch/nr-xliff-streaming",
     "type": "typo3-cms-extension",
-    "description": "XLIFF Streaming Parser - Streaming XLIFF parser for TYPO3: reads XLIFF 1.0, 1.2 and 2.0 with XMLReader one translation unit at a time instead of building a SimpleXML tree of the whole document.",
+    "description": "XLIFF Streaming Parser - Reads XLIFF 1.0, 1.2 and 2.0 with XMLReader one translation unit at a time instead of building a SimpleXML tree of the whole document.",
     "keywords": [
         "TYPO3",
         "extension",
