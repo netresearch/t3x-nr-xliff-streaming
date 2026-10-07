@@ -370,8 +370,8 @@ Error Codes
 .. code-block:: php
    :caption: Exception error codes
 
-   1700000001  // Input is empty, cannot be opened, or is malformed
-   1700000002  // Unit cannot be expanded or read
+   1700000001  // Input is empty, cannot be opened, is malformed, or hits a libxml2 limit
+   1700000002  // Unit cannot be expanded or read, without a libxml2 error
    1700000003  // Unit XML cannot be parsed on its own
    1700000004  // Missing required 'id' attribute
    1700000005  // Missing or empty '<source>' element
