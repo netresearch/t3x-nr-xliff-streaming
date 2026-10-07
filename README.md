@@ -1,6 +1,6 @@
 <!-- SPDX-License-Identifier: GPL-2.0-or-later -->
 <!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
-# TYPO3 Extension: XLIFF Streaming Parser
+# XLIFF Streaming Parser for TYPO3
 
 Streaming XLIFF parser for TYPO3. It reads XLIFF 1.0, 1.2 and 2.0 with XMLReader one translation unit at a time instead of building a SimpleXML tree of the whole document, which keeps the memory needed for large translation files low.
 
