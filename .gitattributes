@@ -25,7 +25,5 @@ AGENTS.md export-ignore
 CLAUDE.md export-ignore
 /docs export-ignore
 /.bestpractices.json export-ignore
-/.styleci.yml export-ignore
-/crowdin.yml export-ignore
 /renovate.json export-ignore
 /Makefile export-ignore
