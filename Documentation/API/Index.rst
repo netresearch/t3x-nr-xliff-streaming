@@ -109,6 +109,7 @@ InvalidXliffException
 
    This exception is thrown when:
    - The input is empty
+   - The XML is not well-formed
    - A unit cannot be read or parsed on its own
    - Required ``id`` attribute is missing on trans-unit
    - Required ``<source>`` element is missing
@@ -116,13 +117,15 @@ InvalidXliffException
    **Error Codes:**
 
    1700000001
-      The input is empty, or XMLReader could not open it. Malformed XML does
-      not raise this code: libxml2 reports it as a PHP warning and the parser
-      stops yielding units.
+      The input is empty, XMLReader could not open it, or libxml2 stopped with
+      an error while reading the document or a unit: the XML is not
+      well-formed (for example a mismatched end tag, or an entity declared
+      nowhere), or a limit was hit (a text node above 10,000,000 bytes). The message names the line and libxml2's
+      error. The units before the error may already have been yielded.
 
    1700000002
-      A unit could not be expanded or read, for example because a text node
-      exceeds libxml2's limit of 10,000,000 bytes
+      A unit could not be expanded or read, and libxml2 reported no error
+      for it
 
    1700000003
       The unit's XML cannot be parsed on its own, which happens when it

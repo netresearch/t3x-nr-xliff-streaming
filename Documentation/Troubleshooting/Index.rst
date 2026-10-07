@@ -128,11 +128,10 @@ InvalidXliffException: Failed to parse XML content
 
 **Error Code**: 1700000001
 
-**Problem**: The input is empty, or XMLReader could not open it
-
-Malformed XML does not raise this exception. libxml2 reports it as a PHP
-warning from ``XMLReader::read()`` and the parser stops yielding units, so a
-broken file yields the units before the error, or none.
+**Problem**: The input is empty, XMLReader could not open it, or the XML is
+not well-formed. For malformed XML the message reads
+``Malformed XML at line <n>: <libxml2 error>``. The units before the error may
+already have been yielded.
 
 **Solutions**:
 
