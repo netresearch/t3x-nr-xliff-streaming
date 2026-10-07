@@ -502,25 +502,28 @@ Composer Installation
 ```
 
 ### ✅ Good: Tables with performance data
+Take every figure from a measurement the repository can reproduce; these
+are from `Documentation/Performance/Index.rst`.
+
 ```rst
-Performance Comparison
-======================
+.. list-table:: Streaming parser and SimpleXML
+   :header-rows: 1
 
-.. table:: Memory and Speed Comparison
-
-   ==========  ==================  ================  ==============  ==============
-   File Size   SimpleXML Memory    Streaming Memory  SimpleXML Time  Streaming Time
-   ==========  ==================  ================  ==============  ==============
-   1 MB        8 MB                30 MB             0.5s            0.1s
-   10 MB       80 MB               30 MB             5s              0.5s
-   100 MB      800 MB              30 MB             90min           90s
-   ==========  ==================  ================  ==============  ==============
+   * - Input size
+     - Streaming added memory
+     - SimpleXML added memory
+   * - 1.7 MB
+     - 2.4 MB
+     - 13.4 MB
+   * - 16.9 MB
+     - 17.4 MB
+     - 131.6 MB
 ```
 
 ### ❌ Bad: Performance data without structure
 ```rst
-Performance: 1MB file uses 8MB with SimpleXML but only 30MB streaming.
-10MB file uses 80MB vs 30MB. 100MB file uses 800MB vs 30MB.
+Performance: a 1.7 MB file adds 2.4 MB while streaming and 13.4 MB with
+SimpleXML. A 16.9 MB file adds 17.4 MB against 131.6 MB.
 ```
 
 ## When stuck
