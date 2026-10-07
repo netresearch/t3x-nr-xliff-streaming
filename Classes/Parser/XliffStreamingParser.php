@@ -183,7 +183,11 @@ final class XliffStreamingParser implements XliffParserInterface
         $expanded = $this->failOnXmlError(static fn(): DOMNode|false => $xmlReader->expand());
         if ($expanded === false) {
             throw new InvalidXliffException(
-                'Failed to expand trans-unit (possible entity reference loop or XXE attack)',
+                // Entity amplification and a text node above libxml2's limit
+                // make libxml2 report an error, which failOnXmlError() turns
+                // into 1700000001; this is a failure libxml2 gave no reason
+                // for.
+                'Failed to expand trans-unit',
                 1700000002
             );
         }
