@@ -315,6 +315,28 @@ XML;
     }
 
     #[Test]
+    public function doesNotLeaveItsToleratedErrorsInTheCallersLibxmlBuffer(): void
+    {
+        $previous = libxml_use_internal_errors(true);
+        libxml_clear_errors();
+
+        try {
+            // The undeclared prefixes are errors the reader goes on after;
+            // with no unit in the document, no unit extraction clears them.
+            $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits(
+                '<xliff version="1.2"><file><body><x t3:foo="1"/><x t3:foo="2"/></body></file></xliff>',
+            ));
+
+            self::assertSame([], $units);
+
+            self::assertSame([], libxml_get_errors());
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previous);
+        }
+    }
+
+    #[Test]
     public function throwsExceptionForMissingIdAttribute(): void
     {
         $xliff = <<<'XML'

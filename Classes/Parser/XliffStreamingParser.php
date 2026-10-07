@@ -132,6 +132,15 @@ final class XliffStreamingParser implements XliffParserInterface
         try {
             $result = $call();
             $errors = array_slice(libxml_get_errors(), $errorsBefore);
+
+            // With the caller's internal-error collection on, the errors of
+            // a call that went on stay buffered and the next call would copy
+            // them again, so the cost of a document with many such errors
+            // outside its units would grow quadratically. Drop what this
+            // call added, unless the caller had errors pending.
+            if ($errorsBefore === 0) {
+                libxml_clear_errors();
+            }
         } finally {
             restore_error_handler();
             libxml_use_internal_errors($useInternalErrors);
