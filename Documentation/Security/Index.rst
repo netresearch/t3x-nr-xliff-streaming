@@ -350,7 +350,7 @@ The parser is resilient to XML bomb attacks due to streaming:
   declared entity is rejected
 - **Quadratic blowup:** Same mechanism; no entity text is copied into a unit
 - **Huge text nodes:** A text node above 10,000,000 bytes is rejected with
-  code 1700000002
+  code 1700000001
 
 **Result:** Entity expansion cannot multiply the input. The whole document is
 held in memory as the input string, so bound the input size before parsing,
