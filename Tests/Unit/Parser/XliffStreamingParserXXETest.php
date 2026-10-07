@@ -127,23 +127,39 @@ XML;
 </xliff>
 XML;
 
-        // The parser rejects the billion-laughs payload with InvalidXliffException,
-        // which is the secure behaviour. Which internal libxml rejection path fires --
-        // entity-reference-loop / failed-to-read (code 1700000002) during expand(), or
-        // "external entities are blocked" (code 1700000003) when re-reading the
-        // trans-unit -- depends on the libxml version, so we assert on the stable
-        // contract (rejection via one of the entity-protection paths) rather than the
-        // exact code or message text, which vary with the libxml version.
-        try {
-            iterator_to_array($this->xliffStreamingParser->parseTransUnits($billionLaughs));
-            self::fail('Expected InvalidXliffException for billion-laughs payload');
-        } catch (InvalidXliffException $invalidXliffException) {
-            self::assertContains(
-                $invalidXliffException->getCode(),
-                [1700000002, 1700000003],
-                'Billion-laughs payload must be rejected by an entity-protection path',
-            );
+        // The entities are not substituted, and this small payload stays below
+        // libxml2's amplification limit, so the reader passes it on; re-parsing
+        // the unit on its own then finds entity references without their DTD
+        // and rejects it (1700000003, on libxml2 2.9.14 and 2.13.9 alike).
+        // entityAmplificationAboveTheLibxmlLimitIsRejected() covers a payload
+        // that reaches the limit.
+        $this->expectException(InvalidXliffException::class);
+        $this->expectExceptionCode(1700000003);
+
+        iterator_to_array($this->xliffStreamingParser->parseTransUnits($billionLaughs));
+    }
+
+    #[Test]
+    public function entityAmplificationAboveTheLibxmlLimitIsRejected(): void
+    {
+        // Ten entities, each above the first holding ten references to the
+        // one below (10^10 characters if expanded): libxml2 stops at its entity
+        // amplification limit while reading, and failOnXmlError() turns that
+        // error into 1700000001.
+        $entities = '<!ENTITY e0 "aaaaaaaaaa">';
+        for ($level = 1; $level < 10; ++$level) {
+            $entities .= '<!ENTITY e' . $level . ' "' . str_repeat('&e' . ($level - 1) . ';', 10) . '">';
         }
+
+        $payload = '<?xml version="1.0"?><!DOCTYPE xliff [' . $entities . ']>'
+            . '<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2"><file><body>'
+            . '<trans-unit id="dos.test"><source>&e9;</source></trans-unit></body></file></xliff>';
+
+        $this->expectException(InvalidXliffException::class);
+        $this->expectExceptionCode(1700000001);
+        $this->expectExceptionMessage('amplification');
+
+        iterator_to_array($this->xliffStreamingParser->parseTransUnits($payload));
     }
 
     #[Test]
