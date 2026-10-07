@@ -218,15 +218,100 @@ XML;
     }
 
     #[Test]
-    public function handlesMalformedXmlGracefully(): void
+    public function throwsExceptionForMalformedXml(): void
     {
+        // A mismatched end tag. This used to end the iteration silently with
+        // no units, which a caller could not tell apart from a document that
+        // holds none; parseTransUnits() documents InvalidXliffException for
+        // malformed XML.
         $invalidXml = '<xliff><file><body><trans-unit id="test"><source>Test</source></body></file></xliff>';
 
-        // Malformed XML (mismatched tags) results in no trans-units being found
-        // XMLReader emits warnings but doesn't find properly structured elements
-        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($invalidXml));
+        $this->expectException(InvalidXliffException::class);
+        $this->expectExceptionCode(1700000001);
+        $this->expectExceptionMessageMatches('/^Malformed XML at line 1: /');
 
-        self::assertCount(0, $units, 'Malformed XML should result in no trans-units found');
+        iterator_to_array($this->xliffStreamingParser->parseTransUnits($invalidXml));
+    }
+
+    #[Test]
+    public function throwsExceptionForATruncatedDocument(): void
+    {
+        // Depending on how far libxml2 parses ahead of the reader, the error
+        // surfaces before or after the first unit is yielded (libxml2 2.9.14
+        // yields none, 2.13.9 yields "first"); what matters is that the
+        // iteration does not end as if the document were complete.
+        $truncated = <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file target-language="de" datatype="plaintext" original="messages">
+        <body>
+            <trans-unit id="first">
+                <source>First</source>
+            </trans-unit>
+            <trans-unit id="second">
+                <source>Sec
+XML;
+
+        $this->expectException(InvalidXliffException::class);
+        $this->expectExceptionCode(1700000001);
+
+        iterator_to_array($this->xliffStreamingParser->parseTransUnits($truncated));
+    }
+
+    #[Test]
+    public function yieldsTheUnitsBeforeAnErrorFurtherInThenThrows(): void
+    {
+        $units = '';
+        for ($i = 1; $i <= 500; ++$i) {
+            $units .= '<trans-unit id="u' . $i . '"><source>Text ' . $i . '</source></trans-unit>';
+        }
+
+        $xliff = '<xliff version="1.2"><file><body>' . $units . '<trans-unit id="broken"><source>x</target>';
+        $ids = [];
+
+        try {
+            foreach ($this->xliffStreamingParser->parseTransUnits($xliff) as $unit) {
+                $ids[] = $unit['id'];
+            }
+
+            self::fail('The broken unit at the end must raise InvalidXliffException');
+        } catch (InvalidXliffException $invalidXliffException) {
+            self::assertSame(1700000001, $invalidXliffException->getCode());
+        }
+
+        self::assertContains('u1', $ids, 'Units before the error are still yielded');
+        self::assertNotContains('broken', $ids);
+    }
+
+    #[Test]
+    public function keepsParsingADocumentWithAnUndeclaredNamespacePrefix(): void
+    {
+        // Well-formed but not namespace-well-formed: libxml2 reports the
+        // undeclared prefix as an error while the reader goes on.
+        $xliff = '<xliff version="1.2"><file><body>'
+            . '<trans-unit id="a" t3:foo="1"><source>A</source></trans-unit>'
+            . '<trans-unit id="b"><source>B</source></trans-unit>'
+            . '</body></file></xliff>';
+
+        $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
+
+        self::assertSame(['a', 'b'], array_column($units, 'id'));
+    }
+
+    #[Test]
+    public function leavesTheCallersLibxmlErrorSettingUnchanged(): void
+    {
+        $previous = libxml_use_internal_errors(false);
+
+        try {
+            iterator_to_array($this->xliffStreamingParser->parseTransUnits(
+                '<xliff version="1.2"><file><body><trans-unit id="a"><source>A</source></trans-unit></body></file></xliff>',
+            ));
+
+            self::assertFalse(libxml_use_internal_errors(false));
+        } finally {
+            libxml_use_internal_errors($previous);
+        }
     }
 
     #[Test]

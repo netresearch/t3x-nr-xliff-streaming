@@ -9,9 +9,11 @@ declare(strict_types=1);
 
 namespace Netresearch\NrXliffStreaming\Parser;
 
+use DOMNode;
 use Generator;
 use Netresearch\NrXliffStreaming\Exception\InvalidXliffException;
 use SimpleXMLElement;
+
 use XMLReader;
 
 use function is_string;
@@ -74,7 +76,7 @@ final class XliffStreamingParser implements XliffParserInterface
 
         try {
             // Stream through XML elements
-            while ($xmlReader->read()) {
+            while ($this->read($xmlReader)) {
                 // Check for trans-unit elements (XLIFF 1.x) or unit elements (XLIFF 2.0)
                 if (
                     $xmlReader->nodeType === XMLReader::ELEMENT
@@ -88,6 +90,68 @@ final class XliffStreamingParser implements XliffParserInterface
             // Ensure XMLReader resource is always closed
             $xmlReader->close();
         }
+    }
+
+    /**
+     * Advance the reader by one node and fail on malformed XML
+     *
+     * XMLReader::read() reports a well-formedness error as a PHP warning and
+     * returns false, so the loop above would end as if the document were
+     * complete: the caller got the units before the error, or none, and could
+     * not tell a truncated or broken document from a short one.
+     *
+     * @throws InvalidXliffException if the XML is not well-formed
+     */
+    private function read(XMLReader $xmlReader): bool
+    {
+        return $this->failOnXmlError(static fn(): bool => $xmlReader->read());
+    }
+
+    /**
+     * Run one XMLReader call and raise its libxml2 errors as an exception
+     *
+     * The libxml2 errors of this one call are collected instead of being
+     * emitted as PHP warnings. A fatal error, or an error with which the call
+     * failed, raises InvalidXliffException. XMLReader's own warning for a failed call
+     * ("An Error Occurred while expanding") is suppressed for the same reason:
+     * the failure is reported by the exception, here or by the caller. The
+     * caller's libxml error setting and error handler are restored before
+     * control returns, also between the yielded units.
+     *
+     * @template T
+     * @param callable(): T $call
+     * @return T
+     * @throws InvalidXliffException if libxml2 reported a fatal error, or an error with which the call failed
+     */
+    private function failOnXmlError(callable $call): mixed
+    {
+        $useInternalErrors = libxml_use_internal_errors(true);
+        $errorsBefore = count(libxml_get_errors());
+        set_error_handler(static fn(): bool => true, E_WARNING);
+
+        try {
+            $result = $call();
+            $errors = array_slice(libxml_get_errors(), $errorsBefore);
+        } finally {
+            restore_error_handler();
+            libxml_use_internal_errors($useInternalErrors);
+        }
+
+        foreach ($errors as $error) {
+            // A fatal error ends the document, and an error with which the
+            // call failed (libxml2 2.9 reports an over-long text node so from
+            // expand()) ends the unit. Errors the reader goes on after, such
+            // as an undeclared namespace prefix, keep the document parsing as
+            // it did before.
+            if ($error->level === LIBXML_ERR_FATAL || ($result === false && $error->level === LIBXML_ERR_ERROR)) {
+                throw new InvalidXliffException(
+                    sprintf('Malformed XML at line %d: %s', $error->line, trim($error->message)),
+                    1700000001
+                );
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -116,7 +180,7 @@ final class XliffStreamingParser implements XliffParserInterface
      */
     private function extractTransUnit(XMLReader $xmlReader): array
     {
-        $expanded = $xmlReader->expand();
+        $expanded = $this->failOnXmlError(static fn(): DOMNode|false => $xmlReader->expand());
         if ($expanded === false) {
             throw new InvalidXliffException(
                 'Failed to expand trans-unit (possible entity reference loop or XXE attack)',

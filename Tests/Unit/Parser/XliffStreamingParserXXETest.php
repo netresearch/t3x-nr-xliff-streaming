@@ -171,8 +171,9 @@ XML;
             . '<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2"><file><body>'
             . '<trans-unit id="pe.test"><source>&canary;</source></trans-unit></body></file></xliff>';
 
-        // libxml2 2.9 ends the document without a unit, 2.13 rejects the unit;
-        // in both cases the file content never reaches a yielded unit.
+        // libxml2 2.9.14 rejects the document while reading (1700000001),
+        // 2.13.9 rejects the unit (1700000003); in both cases the file
+        // content never reaches a yielded unit.
         $sources = array_column($this->collectUnitsOrInvalidXliff($xliff), 'source');
 
         self::assertSame([], array_filter($sources, static fn(string $source): bool => str_contains($source, 'LOADED-FROM')));
@@ -185,8 +186,11 @@ XML;
         $xliff = '<?xml version="1.0"?><xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2"><file><body>'
             . '<trans-unit id="huge"><source>' . str_repeat('A', 10_000_001) . '</source></trans-unit></body></file></xliff>';
 
+        // libxml2 reports the limit while expanding the unit (2.9.14 as an
+        // error, 2.13.9 as a fatal error), and the parser raises it with the
+        // reader's code.
         $this->expectException(InvalidXliffException::class);
-        $this->expectExceptionCode(1700000002);
+        $this->expectExceptionCode(1700000001);
 
         $this->parseWithoutLibxmlWarnings($xliff);
     }
