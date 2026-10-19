@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * SPDX-License-Identifier: GPL-2.0-or-later
  * SPDX-FileCopyrightText: Netresearch DTT GmbH
  */
+
+declare(strict_types=1);
 
 namespace Netresearch\NrXliffStreaming\Tests\Performance;
 
@@ -16,7 +16,7 @@ use PHPUnit\Framework\Attributes\Test;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
- * Performance benchmark tests for XliffStreamingParser
+ * Performance benchmark tests for XliffStreamingParser.
  *
  * Checks upper bounds for parse time and for memory as PHP's memory
  * manager reports it (memory_get_usage()), which excludes libxml2's
@@ -40,12 +40,12 @@ final class ParserBenchmarkTest extends UnitTestCase
     {
         // Generate XLIFF with 100 trans-units
         $units = [];
-        for ($i = 1; $i <= 100; $i++) {
+        for ($i = 1; $i <= 100; ++$i) {
             $units[] = sprintf(
                 '<trans-unit id="unit.%d"><source>Source %d</source><target>Target %d</target></trans-unit>',
                 $i,
                 $i,
-                $i
+                $i,
             );
         }
 
@@ -54,13 +54,13 @@ final class ParserBenchmarkTest extends UnitTestCase
             . '<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">'
             . '<file target-language="de" datatype="plaintext" original="messages">'
             . '<body>%s</body></file></xliff>',
-            implode("\n", $units)
+            implode("\n", $units),
         );
 
         $memoryBefore = memory_get_usage();
-        $parsedUnits = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
-        $memoryAfter = memory_get_usage();
-        $memoryUsed = $memoryAfter - $memoryBefore;
+        $parsedUnits  = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
+        $memoryAfter  = memory_get_usage();
+        $memoryUsed   = $memoryAfter - $memoryBefore;
 
         self::assertCount(100, $parsedUnits);
         // Memory usage should be reasonable (under 10MB for 100 units)
@@ -72,12 +72,12 @@ final class ParserBenchmarkTest extends UnitTestCase
     {
         // Simulate larger file with 1000 trans-units
         $units = [];
-        for ($i = 1; $i <= 1000; $i++) {
+        for ($i = 1; $i <= 1000; ++$i) {
             $units[] = sprintf(
                 '<trans-unit id="large.%d"><source>%s</source><target>%s</target></trans-unit>',
                 $i,
                 str_repeat('Source text ', 10),
-                str_repeat('Target text ', 10)
+                str_repeat('Target text ', 10),
             );
         }
 
@@ -86,19 +86,19 @@ final class ParserBenchmarkTest extends UnitTestCase
             . '<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">'
             . '<file target-language="de" datatype="plaintext" original="messages">'
             . '<body>%s</body></file></xliff>',
-            implode("\n", $units)
+            implode("\n", $units),
         );
 
         $memoryBefore = memory_get_usage();
-        $startTime = microtime(true);
+        $startTime    = microtime(true);
 
         $parsedUnits = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
-        $endTime = microtime(true);
+        $endTime     = microtime(true);
         $memoryAfter = memory_get_usage();
 
         $timeElapsed = $endTime - $startTime;
-        $memoryUsed = $memoryAfter - $memoryBefore;
+        $memoryUsed  = $memoryAfter - $memoryBefore;
 
         self::assertCount(1000, $parsedUnits);
 
@@ -112,11 +112,11 @@ final class ParserBenchmarkTest extends UnitTestCase
     {
         // Generate large XLIFF
         $units = [];
-        for ($i = 1; $i <= 500; $i++) {
+        for ($i = 1; $i <= 500; ++$i) {
             $units[] = sprintf(
                 '<trans-unit id="gen.%d"><source>Source %d</source></trans-unit>',
                 $i,
-                $i
+                $i,
             );
         }
 
@@ -125,16 +125,16 @@ final class ParserBenchmarkTest extends UnitTestCase
             . '<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">'
             . '<file target-language="de" datatype="plaintext" original="messages">'
             . '<body>%s</body></file></xliff>',
-            implode("\n", $units)
+            implode("\n", $units),
         );
 
         $memoryBefore = memory_get_usage();
-        $generator = $this->xliffStreamingParser->parseTransUnits($xliff);
+        $generator    = $this->xliffStreamingParser->parseTransUnits($xliff);
 
         self::assertInstanceOf(Generator::class, $generator);
 
         // Iterate without converting to array (memory-efficient)
-        $count = 0;
+        $count                    = 0;
         $maxMemoryDuringIteration = 0;
 
         foreach ($generator as $unit) {
@@ -157,33 +157,33 @@ final class ParserBenchmarkTest extends UnitTestCase
     public function benchmarkParsingSpeed(): void
     {
         $xliff = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file target-language="de" datatype="plaintext" original="messages">
-        <body>
-            <trans-unit id="speed.test"><source>Test</source><target>Testen</target></trans-unit>
-        </body>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+                <file target-language="de" datatype="plaintext" original="messages">
+                    <body>
+                        <trans-unit id="speed.test"><source>Test</source><target>Testen</target></trans-unit>
+                    </body>
+                </file>
+            </xliff>
+            XML;
 
         // Benchmark 100 iterations
         $iterations = 100;
-        $startTime = microtime(true);
+        $startTime  = microtime(true);
 
-        for ($i = 0; $i < $iterations; $i++) {
+        for ($i = 0; $i < $iterations; ++$i) {
             $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
             self::assertCount(1, $units);
         }
 
-        $endTime = microtime(true);
+        $endTime   = microtime(true);
         $totalTime = $endTime - $startTime;
-        $avgTime = $totalTime / $iterations;
+        $avgTime   = $totalTime / $iterations;
 
         // Should parse simple XLIFF in under 10ms per iteration
         self::assertLessThan(0.01, $avgTime, sprintf(
             'Average parsing time should be under 10ms (actual: %.4fms)',
-            $avgTime * 1000
+            $avgTime * 1000,
         ));
     }
 }

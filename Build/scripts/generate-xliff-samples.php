@@ -1,14 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * SPDX-License-Identifier: GPL-2.0-or-later
  * SPDX-FileCopyrightText: Netresearch DTT GmbH
  */
 
+declare(strict_types=1);
+
 /**
- * Generate XLIFF sample files for performance testing
+ * Generate XLIFF sample files for performance testing.
  */
 function generateXliffFile(string $outputPath, int $transUnitCount): void
 {
@@ -21,8 +21,8 @@ function generateXliffFile(string $outputPath, int $transUnitCount): void
     fwrite($file, '    <body>' . "\n");
 
     // Generate trans-units
-    for ($i = 1; $i <= $transUnitCount; $i++) {
-        $id = sprintf('component.type.placeholder_%d', $i);
+    for ($i = 1; $i <= $transUnitCount; ++$i) {
+        $id     = sprintf('component.type.placeholder_%d', $i);
         $source = sprintf('This is source text number %d with some additional content to make it realistic. Lorem ipsum dolor sit amet, consectetur adipiscing elit.', $i);
         $target = sprintf('Dies ist Quelltext Nummer %d mit zusätzlichem Inhalt, um es realistisch zu machen. Lorem ipsum dolor sit amet, consectetur adipiscing elit.', $i);
 
@@ -33,7 +33,7 @@ function generateXliffFile(string $outputPath, int $transUnitCount): void
             . '      </trans-unit>' . "\n",
             htmlspecialchars($id, ENT_XML1),
             htmlspecialchars($source, ENT_XML1),
-            htmlspecialchars($target, ENT_XML1)
+            htmlspecialchars($target, ENT_XML1),
         ));
 
         // Progress indicator
@@ -49,7 +49,7 @@ function generateXliffFile(string $outputPath, int $transUnitCount): void
 
     fclose($file);
 
-    $fileSize = filesize($outputPath);
+    $fileSize   = filesize($outputPath);
     $fileSizeMB = round($fileSize / 1024 / 1024, 2);
     echo "Generated: {$outputPath}\n";
     echo "Size: {$fileSizeMB} MB ({$fileSize} bytes)\n";
@@ -59,7 +59,7 @@ function generateXliffFile(string $outputPath, int $transUnitCount): void
 // Create output directory
 $outputDir = __DIR__ . '/../../Tests/Fixtures/Performance';
 if (!is_dir($outputDir)) {
-    mkdir($outputDir, 0755, true);
+    mkdir($outputDir, 0o755, true);
 }
 
 echo "Generating XLIFF sample files...\n\n";

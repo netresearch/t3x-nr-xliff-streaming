@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * SPDX-License-Identifier: GPL-2.0-or-later
  * SPDX-FileCopyrightText: Netresearch DTT GmbH
  */
+
+declare(strict_types=1);
 
 namespace Netresearch\NrXliffStreaming\Tests\Unit;
 
@@ -156,7 +156,7 @@ final class VersionConsistencyTest extends UnitTestCase
         $jobs = $workflow['jobs'] ?? null;
         self::assertIsArray($jobs, 'ci.yml must define jobs');
 
-        $tested = [];
+        $tested     = [];
         $matrixJobs = 0;
         foreach ($jobs as $job) {
             $with = is_array($job) ? ($job['with'] ?? null) : null;
@@ -193,7 +193,7 @@ final class VersionConsistencyTest extends UnitTestCase
      *
      * @param list<string> $phpVersions
      * @param list<string> $typo3Versions
-     * @param list<mixed> $excludes
+     * @param list<mixed>  $excludes
      *
      * @return list<string>
      */
@@ -241,7 +241,7 @@ final class VersionConsistencyTest extends UnitTestCase
 
     /**
      * @param array{php: mixed, typo3: mixed} $cell
-     * @param list<mixed> $excludes
+     * @param list<mixed>                     $excludes
      */
     private function isExcluded(array $cell, array $excludes): bool
     {
@@ -266,8 +266,8 @@ final class VersionConsistencyTest extends UnitTestCase
     private function sameConstraint(string $a, string $b): bool
     {
         $versionParser = new VersionParser();
-        $constraint = $versionParser->parseConstraints($a);
-        $other = $versionParser->parseConstraints($b);
+        $constraint    = $versionParser->parseConstraints($a);
+        $other         = $versionParser->parseConstraints($b);
 
         return Intervals::isSubsetOf($constraint, $other) && Intervals::isSubsetOf($other, $constraint);
     }
@@ -362,7 +362,7 @@ final class VersionConsistencyTest extends UnitTestCase
     #[Test]
     public function typo3RangeAgreesAcrossComposerExtEmconfAndCi(): void
     {
-        $tested = $this->ciTested('typo3');
+        $tested   = $this->ciTested('typo3');
         $required = $this->composerRequire('typo3/cms-core');
 
         // Shared CI and `runTests.sh -t` narrow typo3/cms-core in composer.json
@@ -373,9 +373,9 @@ final class VersionConsistencyTest extends UnitTestCase
         // accident (`^14.3` alone) passes here. That has to be caught in review
         // or at release.
         $accepted = [implode(' || ', $tested), ...$tested];
-        $matches = array_filter(
+        $matches  = array_filter(
             $accepted,
-            fn(string $constraint): bool => $this->sameConstraint($required, $constraint),
+            fn (string $constraint): bool => $this->sameConstraint($required, $constraint),
         );
         self::assertNotSame(
             [],

@@ -1,18 +1,18 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * SPDX-License-Identifier: GPL-2.0-or-later
  * SPDX-FileCopyrightText: Netresearch DTT GmbH
  */
+
+declare(strict_types=1);
 
 namespace Netresearch\NrXliffStreaming\Exception;
 
 use RuntimeException;
 
 /**
- * Exception thrown when XLIFF content is malformed or invalid
+ * Exception thrown when XLIFF content is malformed or invalid.
  *
  * @author Netresearch DTT GmbH
  */

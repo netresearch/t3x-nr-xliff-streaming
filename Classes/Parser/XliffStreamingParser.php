@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * SPDX-License-Identifier: GPL-2.0-or-later
  * SPDX-FileCopyrightText: Netresearch DTT GmbH
  */
+
+declare(strict_types=1);
 
 namespace Netresearch\NrXliffStreaming\Parser;
 
@@ -13,13 +13,12 @@ use DOMNode;
 use Generator;
 use Netresearch\NrXliffStreaming\Exception\InvalidXliffException;
 use SimpleXMLElement;
-
 use XMLReader;
 
 use function is_string;
 
 /**
- * High-performance streaming XLIFF parser supporting XLIFF 1.0, 1.2, and 2.0
+ * High-performance streaming XLIFF parser supporting XLIFF 1.0, 1.2, and 2.0.
  *
  * Uses XMLReader and builds a tree for one translation unit at a time. The
  * document itself is passed as a string, so memory grows with the input size;
@@ -35,17 +34,17 @@ use function is_string;
 final class XliffStreamingParser implements XliffParserInterface
 {
     /**
-     * XLIFF 1.2 namespace URI
+     * XLIFF 1.2 namespace URI.
      */
     private const XLIFF_1_2_NS = 'urn:oasis:names:tc:xliff:document:1.2';
 
     /**
-     * XLIFF 2.0 namespace URI
+     * XLIFF 2.0 namespace URI.
      */
     private const XLIFF_2_0_NS = 'urn:oasis:names:tc:xliff:document:2.0';
 
     /**
-     * Parse XLIFF trans-units using streaming XMLReader
+     * Parse XLIFF trans-units using streaming XMLReader.
      *
      * Generator pattern yields one trans-unit at a time.
      * Each trans-unit is converted to SimpleXMLElement for easy data extraction.
@@ -54,7 +53,9 @@ final class XliffStreamingParser implements XliffParserInterface
      * against about eight times the input size for a SimpleXML tree.
      *
      * @param string $xmlContent XLIFF file content
+     *
      * @return Generator<array{id: string, source: string, target: string|null, line: int}>
+     *
      * @throws InvalidXliffException if XML is malformed or invalid XLIFF structure
      */
     public function parseTransUnits(string $xmlContent): Generator
@@ -93,7 +94,7 @@ final class XliffStreamingParser implements XliffParserInterface
     }
 
     /**
-     * Advance the reader by one node and fail on malformed XML
+     * Advance the reader by one node and fail on malformed XML.
      *
      * XMLReader::read() reports a well-formedness error as a PHP warning and
      * returns false, so the loop above would end as if the document were
@@ -104,11 +105,11 @@ final class XliffStreamingParser implements XliffParserInterface
      */
     private function read(XMLReader $xmlReader): bool
     {
-        return $this->failOnXmlError(static fn(): bool => $xmlReader->read());
+        return $this->failOnXmlError(static fn (): bool => $xmlReader->read());
     }
 
     /**
-     * Run one XMLReader call and raise its libxml2 errors as an exception
+     * Run one XMLReader call and raise its libxml2 errors as an exception.
      *
      * The libxml2 errors of this one call are collected instead of being
      * emitted as PHP warnings. A fatal error, or an error with which the call
@@ -119,15 +120,18 @@ final class XliffStreamingParser implements XliffParserInterface
      * control returns, also between the yielded units.
      *
      * @template T
+     *
      * @param callable(): T $call
+     *
      * @return T
+     *
      * @throws InvalidXliffException if libxml2 reported a fatal error, or an error with which the call failed
      */
     private function failOnXmlError(callable $call): mixed
     {
         $useInternalErrors = libxml_use_internal_errors(true);
-        $errorsBefore = count(libxml_get_errors());
-        set_error_handler(static fn(): bool => true, E_WARNING);
+        $errorsBefore      = count(libxml_get_errors());
+        set_error_handler(static fn (): bool => true, E_WARNING);
 
         try {
             $result = $call();
@@ -155,7 +159,7 @@ final class XliffStreamingParser implements XliffParserInterface
             if ($error->level === LIBXML_ERR_FATAL || ($result === false && $error->level === LIBXML_ERR_ERROR)) {
                 throw new InvalidXliffException(
                     sprintf('Malformed XML at line %d: %s', $error->line, trim($error->message)),
-                    1700000001
+                    1700000001,
                 );
             }
         }
@@ -164,9 +168,10 @@ final class XliffStreamingParser implements XliffParserInterface
     }
 
     /**
-     * Check if namespace URI is a supported XLIFF version
+     * Check if namespace URI is a supported XLIFF version.
      *
      * @param string|null $uri Namespace URI (null or empty for XLIFF 1.0)
+     *
      * @return bool True if supported XLIFF namespace
      */
     private function isXliffNamespace(?string $uri): bool
@@ -178,18 +183,20 @@ final class XliffStreamingParser implements XliffParserInterface
     }
 
     /**
-     * Extract trans-unit data from current XMLReader position
+     * Extract trans-unit data from current XMLReader position.
      *
      * Converts XMLReader node to SimpleXMLElement for easy data extraction
      * with XXE protection (LIBXML_NONET flag).
      *
      * @param XMLReader $xmlReader XMLReader positioned at trans-unit element
+     *
      * @return array{id: string, source: string, target: string|null, line: int}
+     *
      * @throws InvalidXliffException if trans-unit structure is invalid
      */
     private function extractTransUnit(XMLReader $xmlReader): array
     {
-        $expanded = $this->failOnXmlError(static fn(): DOMNode|false => $xmlReader->expand());
+        $expanded = $this->failOnXmlError(static fn (): DOMNode|false => $xmlReader->expand());
         if ($expanded === false) {
             throw new InvalidXliffException(
                 // Entity amplification and a text node above libxml2's limit
@@ -197,7 +204,7 @@ final class XliffStreamingParser implements XliffParserInterface
                 // into 1700000001; this is a failure libxml2 gave no reason
                 // for.
                 'Failed to expand trans-unit',
-                1700000002
+                1700000002,
             );
         }
 
@@ -209,7 +216,7 @@ final class XliffStreamingParser implements XliffParserInterface
         if (!is_string($xml) || $xml === '') {
             throw new InvalidXliffException(
                 sprintf('Failed to read trans-unit at line %d', $line),
-                1700000002
+                1700000002,
             );
         }
 
@@ -220,7 +227,7 @@ final class XliffStreamingParser implements XliffParserInterface
             $element = simplexml_load_string(
                 $xml,
                 SimpleXMLElement::class,
-                LIBXML_NONET
+                LIBXML_NONET,
             );
         } finally {
             libxml_use_internal_errors($useInternalErrors);
@@ -230,7 +237,7 @@ final class XliffStreamingParser implements XliffParserInterface
         if ($element === false) {
             throw new InvalidXliffException(
                 sprintf('Invalid trans-unit XML at line %d (external entities are blocked)', $line),
-                1700000003
+                1700000003,
             );
         }
 
@@ -240,11 +247,11 @@ final class XliffStreamingParser implements XliffParserInterface
         }
 
         // Extract required id attribute
-        $id = (string)($element->attributes()['id'] ?? '');
+        $id = (string) ($element->attributes()['id'] ?? '');
         if ($id === '') {
             throw new InvalidXliffException(
                 sprintf('Missing required "id" attribute in trans-unit at line %d', $line),
-                1700000004
+                1700000004,
             );
         }
 
@@ -256,25 +263,25 @@ final class XliffStreamingParser implements XliffParserInterface
         }
 
         // Extract source (required)
-        $source = (string)$sourceElement->source;
+        $source = (string) $sourceElement->source;
         if ($source === '') {
             throw new InvalidXliffException(
                 sprintf('Missing required <source> element in unit "%s" at line %d', $id, $line),
-                1700000005
+                1700000005,
             );
         }
 
         // Extract target (optional)
         $target = null;
         if (property_exists($sourceElement, 'target') && $sourceElement->target !== null && $sourceElement->target->getName() !== '') {
-            $target = (string)$sourceElement->target;
+            $target = (string) $sourceElement->target;
         }
 
         return [
-            'id' => $id,
+            'id'     => $id,
             'source' => $source,
             'target' => $target,
-            'line' => $line,
+            'line'   => $line,
         ];
     }
 }

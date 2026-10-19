@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * SPDX-License-Identifier: GPL-2.0-or-later
  * SPDX-FileCopyrightText: Netresearch DTT GmbH
  */
+
+declare(strict_types=1);
 
 namespace Netresearch\NrXliffStreaming\Tests\Unit\Parser;
 
@@ -17,7 +17,7 @@ use PHPUnit\Framework\Attributes\Test;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
- * Test cases for XliffStreamingParser
+ * Test cases for XliffStreamingParser.
  *
  * @author Netresearch DTT GmbH
  */
@@ -36,18 +36,18 @@ final class XliffStreamingParserTest extends UnitTestCase
     public function parsesValidXliff10WithoutNamespace(): void
     {
         $xliff = <<<'XML'
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<xliff version="1.0">
-    <file source-language="en" target-language="de" datatype="plaintext" original="messages">
-        <body>
-            <trans-unit id="component|type|placeholder">
-                <source>Hello World</source>
-                <target>Hallo Welt</target>
-            </trans-unit>
-        </body>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+            <xliff version="1.0">
+                <file source-language="en" target-language="de" datatype="plaintext" original="messages">
+                    <body>
+                        <trans-unit id="component|type|placeholder">
+                            <source>Hello World</source>
+                            <target>Hallo Welt</target>
+                        </trans-unit>
+                    </body>
+                </file>
+            </xliff>
+            XML;
 
         $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
@@ -61,18 +61,18 @@ XML;
     public function parsesValidXliff12WithNamespace(): void
     {
         $xliff = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file target-language="de" datatype="plaintext" original="messages" date="2025-01-12T10:00:00Z">
-        <body>
-            <trans-unit id="test.key">
-                <source>Test</source>
-                <target>Testen</target>
-            </trans-unit>
-        </body>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+                <file target-language="de" datatype="plaintext" original="messages" date="2025-01-12T10:00:00Z">
+                    <body>
+                        <trans-unit id="test.key">
+                            <source>Test</source>
+                            <target>Testen</target>
+                        </trans-unit>
+                    </body>
+                </file>
+            </xliff>
+            XML;
 
         $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
@@ -86,18 +86,18 @@ XML;
     public function parsesValidXliff20WithNamespace(): void
     {
         $xliff = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="en" trgLang="de">
-    <file id="f1" original="messages">
-        <unit id="test.unit">
-            <segment>
-                <source>Test</source>
-                <target>Testen</target>
-            </segment>
-        </unit>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="en" trgLang="de">
+                <file id="f1" original="messages">
+                    <unit id="test.unit">
+                        <segment>
+                            <source>Test</source>
+                            <target>Testen</target>
+                        </segment>
+                    </unit>
+                </file>
+            </xliff>
+            XML;
 
         $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
@@ -112,24 +112,24 @@ XML;
     public function parsesMultipleXliff20Units(): void
     {
         $xliff = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="en" trgLang="de">
-    <file id="f1" original="messages">
-        <unit id="unit1">
-            <segment>
-                <source>First</source>
-                <target>Erste</target>
-            </segment>
-        </unit>
-        <unit id="unit2">
-            <segment>
-                <source>Second</source>
-                <target>Zweite</target>
-            </segment>
-        </unit>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="en" trgLang="de">
+                <file id="f1" original="messages">
+                    <unit id="unit1">
+                        <segment>
+                            <source>First</source>
+                            <target>Erste</target>
+                        </segment>
+                    </unit>
+                    <unit id="unit2">
+                        <segment>
+                            <source>Second</source>
+                            <target>Zweite</target>
+                        </segment>
+                    </unit>
+                </file>
+            </xliff>
+            XML;
 
         $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
@@ -146,26 +146,26 @@ XML;
     public function parsesMultipleTransUnits(): void
     {
         $xliff = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file target-language="de" datatype="plaintext" original="messages">
-        <body>
-            <trans-unit id="key1">
-                <source>One</source>
-                <target>Eins</target>
-            </trans-unit>
-            <trans-unit id="key2">
-                <source>Two</source>
-                <target>Zwei</target>
-            </trans-unit>
-            <trans-unit id="key3">
-                <source>Three</source>
-                <target>Drei</target>
-            </trans-unit>
-        </body>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+                <file target-language="de" datatype="plaintext" original="messages">
+                    <body>
+                        <trans-unit id="key1">
+                            <source>One</source>
+                            <target>Eins</target>
+                        </trans-unit>
+                        <trans-unit id="key2">
+                            <source>Two</source>
+                            <target>Zwei</target>
+                        </trans-unit>
+                        <trans-unit id="key3">
+                            <source>Three</source>
+                            <target>Drei</target>
+                        </trans-unit>
+                    </body>
+                </file>
+            </xliff>
+            XML;
 
         $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
@@ -179,17 +179,17 @@ XML;
     public function fallsBackToSourceWhenTargetIsMissing(): void
     {
         $xliff = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file target-language="en" datatype="plaintext" original="messages">
-        <body>
-            <trans-unit id="untranslated">
-                <source>Untranslated text</source>
-            </trans-unit>
-        </body>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+                <file target-language="en" datatype="plaintext" original="messages">
+                    <body>
+                        <trans-unit id="untranslated">
+                            <source>Untranslated text</source>
+                        </trans-unit>
+                    </body>
+                </file>
+            </xliff>
+            XML;
 
         $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
@@ -203,14 +203,14 @@ XML;
     public function handlesEmptyXliffWithNoTransUnits(): void
     {
         $xliff = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file target-language="de" datatype="plaintext" original="messages">
-        <body>
-        </body>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+                <file target-language="de" datatype="plaintext" original="messages">
+                    <body>
+                    </body>
+                </file>
+            </xliff>
+            XML;
 
         $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
@@ -241,16 +241,16 @@ XML;
         // yields none, 2.13.9 yields "first"); what matters is that the
         // iteration does not end as if the document were complete.
         $truncated = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file target-language="de" datatype="plaintext" original="messages">
-        <body>
-            <trans-unit id="first">
-                <source>First</source>
-            </trans-unit>
-            <trans-unit id="second">
-                <source>Sec
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+                <file target-language="de" datatype="plaintext" original="messages">
+                    <body>
+                        <trans-unit id="first">
+                            <source>First</source>
+                        </trans-unit>
+                        <trans-unit id="second">
+                            <source>Sec
+            XML;
 
         $this->expectException(InvalidXliffException::class);
         $this->expectExceptionCode(1700000001);
@@ -267,7 +267,7 @@ XML;
         }
 
         $xliff = '<xliff version="1.2"><file><body>' . $units . '<trans-unit id="broken"><source>x</target>';
-        $ids = [];
+        $ids   = [];
 
         try {
             foreach ($this->xliffStreamingParser->parseTransUnits($xliff) as $unit) {
@@ -340,17 +340,17 @@ XML;
     public function throwsExceptionForMissingIdAttribute(): void
     {
         $xliff = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file target-language="de" datatype="plaintext" original="messages">
-        <body>
-            <trans-unit>
-                <source>Missing ID</source>
-            </trans-unit>
-        </body>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+                <file target-language="de" datatype="plaintext" original="messages">
+                    <body>
+                        <trans-unit>
+                            <source>Missing ID</source>
+                        </trans-unit>
+                    </body>
+                </file>
+            </xliff>
+            XML;
 
         $this->expectException(InvalidXliffException::class);
         $this->expectExceptionCode(1700000004);
@@ -363,17 +363,17 @@ XML;
     public function throwsExceptionForMissingSourceElement(): void
     {
         $xliff = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file target-language="de" datatype="plaintext" original="messages">
-        <body>
-            <trans-unit id="missing-source">
-                <target>Target without source</target>
-            </trans-unit>
-        </body>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+                <file target-language="de" datatype="plaintext" original="messages">
+                    <body>
+                        <trans-unit id="missing-source">
+                            <target>Target without source</target>
+                        </trans-unit>
+                    </body>
+                </file>
+            </xliff>
+            XML;
 
         $this->expectException(InvalidXliffException::class);
         $this->expectExceptionCode(1700000005);
@@ -386,18 +386,18 @@ XML;
     public function handlesUtf8EncodingCorrectly(): void
     {
         $xliff = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file target-language="ja" datatype="plaintext" original="messages">
-        <body>
-            <trans-unit id="unicode.test">
-                <source>Hello 世界 🌍</source>
-                <target>こんにちは 世界 🌏</target>
-            </trans-unit>
-        </body>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+                <file target-language="ja" datatype="plaintext" original="messages">
+                    <body>
+                        <trans-unit id="unicode.test">
+                            <source>Hello 世界 🌍</source>
+                            <target>こんにちは 世界 🌏</target>
+                        </trans-unit>
+                    </body>
+                </file>
+            </xliff>
+            XML;
 
         $units = iterator_to_array($this->xliffStreamingParser->parseTransUnits($xliff));
 
@@ -410,16 +410,16 @@ XML;
     public function usesGeneratorForMemoryEfficiency(): void
     {
         $xliff = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file target-language="de" datatype="plaintext" original="messages">
-        <body>
-            <trans-unit id="key1"><source>One</source></trans-unit>
-            <trans-unit id="key2"><source>Two</source></trans-unit>
-        </body>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+                <file target-language="de" datatype="plaintext" original="messages">
+                    <body>
+                        <trans-unit id="key1"><source>One</source></trans-unit>
+                        <trans-unit id="key2"><source>Two</source></trans-unit>
+                    </body>
+                </file>
+            </xliff>
+            XML;
 
         $generator = $this->xliffStreamingParser->parseTransUnits($xliff);
 
@@ -428,7 +428,7 @@ XML;
         // Consume generator
         $count = 0;
         foreach ($generator as $unit) {
-            $count++;
+            ++$count;
             self::assertArrayHasKey('id', $unit);
             self::assertArrayHasKey('source', $unit);
             self::assertArrayHasKey('target', $unit);
