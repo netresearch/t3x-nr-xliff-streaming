@@ -40,7 +40,7 @@
         "symfony/yaml": "^7.4 || ^8.0",
         "typo3/coding-standards": "^0.9",
         "phpunit/phpunit": "^11.0",
-        "netresearch/typo3-ci-workflows": "^1.8.1"
+        "netresearch/typo3-ci-workflows": "^2.0.3"
     },
     "autoload": {
         "psr-4": {
