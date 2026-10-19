@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * SPDX-License-Identifier: GPL-2.0-or-later
  * SPDX-FileCopyrightText: Netresearch DTT GmbH
  */
+
+declare(strict_types=1);
 
 namespace Netresearch\NrXliffStreaming\Tests\Unit\Parser;
 
@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\Test;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
- * Integration test cases for XliffStreamingParser
+ * Integration test cases for XliffStreamingParser.
  *
  * Tests real-world file operations and parser reusability
  *
@@ -43,7 +43,7 @@ final class XliffStreamingParserIntegrationTest extends UnitTestCase
     #[Test]
     public function parsesRealXliffFileFromFileSystem(): void
     {
-        $fixturePath = __DIR__ . '/../Fixtures/valid/xliff-1.2-namespace.xlf';
+        $fixturePath  = __DIR__ . '/../Fixtures/valid/xliff-1.2-namespace.xlf';
         $xliffContent = file_get_contents($fixturePath);
         self::assertIsString($xliffContent, 'Failed to read fixture file');
 
@@ -59,7 +59,7 @@ final class XliffStreamingParserIntegrationTest extends UnitTestCase
     public function parsesMultipleRealWorldXliffFiles(): void
     {
         $fixtureDir = __DIR__ . '/../Fixtures/valid/';
-        $files = [
+        $files      = [
             'xliff-1.0-simple.xlf',
             'xliff-1.2-namespace.xlf',
             'xliff-2.0-segments.xlf',

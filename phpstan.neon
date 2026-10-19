@@ -1,29 +1,19 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # SPDX-FileCopyrightText: Netresearch DTT GmbH
 
+# The shared config sets level 10, treatPhpDocTypesAsCertain, the
+# strictness flags, the .Build exclude and the curated ergebnis rules
+# (allRules: false); phpstan/extension-installer registers phpstan-typo3,
+# phpat and the other PHPStan extensions. bleedingEdge is stricter than
+# the shared set and stays.
 includes:
-    - .Build/vendor/phpstan/phpstan/conf/bleedingEdge.neon
+    - %currentWorkingDirectory%/.Build/vendor/netresearch/typo3-ci-workflows/config/phpstan/phpstan.neon
+    - %currentWorkingDirectory%/.Build/vendor/phpstan/phpstan/conf/bleedingEdge.neon
 
 parameters:
-    level: max
     paths:
         - Classes
         - Tests
-    excludePaths:
-        - .Build/*
-        - Documentation/*
-    bootstrapFiles:
-        - .Build/vendor/autoload.php
-    treatPhpDocTypesAsCertain: false
-
-    # netresearch/typo3-ci-workflows ships phpstan/extension-installer, which
-    # auto-registers ergebnis/phpstan-rules. Its default (allRules: true)
-    # forbids patterns TYPO3 requires — extending framework base classes such
-    # as UnitTestCase, nullable parameter types. The org baseline
-    # (config/phpstan/phpstan.neon in that package) disables allRules for the
-    # same reason; match it here.
-    ergebnis:
-        allRules: false
 
     ignoreErrors:
         # The parser declares `: Generator` and the tests assert it, so PHPStan
