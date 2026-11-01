@@ -15,8 +15,6 @@ use Netresearch\NrXliffStreaming\Exception\InvalidXliffException;
 use SimpleXMLElement;
 use XMLReader;
 
-use function is_string;
-
 /**
  * High-performance streaming XLIFF parser supporting XLIFF 1.0, 1.2, and 2.0.
  *
@@ -211,9 +209,9 @@ final class XliffStreamingParser implements XliffParserInterface
         $line = $expanded->getLineNo();
 
         // Read trans-unit as XML string
-        // Note: readOuterXml() can return false in practice despite PHPDoc saying string
+        // readOuterXml() returns an empty string on failure
         $xml = $xmlReader->readOuterXml();
-        if (!is_string($xml) || $xml === '') {
+        if ($xml === '') {
             throw new InvalidXliffException(
                 sprintf('Failed to read trans-unit at line %d', $line),
                 1700000002,
