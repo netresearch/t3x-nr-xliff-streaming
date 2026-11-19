@@ -78,5 +78,5 @@ Out of scope: how the integrating code obtains, stores or displays XLIFF content
 ## Verification
 
 - `Tests/Unit/Parser/XliffStreamingParserXXETest.php` holds the security tests named above. Adding `LIBXML_DTDLOAD | LIBXML_NOENT` to the `XMLReader::XML()` flags makes seven of them fail; adding `LIBXML_PARSEHUGE` makes `textNodeAboveLibxmlLimitIsRejected` fail.
-- The unit suite runs on every pull request across PHP 8.2 to 8.5 and TYPO3 13.4 and 14.3 (`.github/workflows/ci.yml`), together with PHPStan at level `max` (`phpstan.neon`) and Opengrep (`.github/workflows/checks.yml`).
+- The unit suite runs on every pull request across PHP 8.2 to 8.6 and TYPO3 13.4 and 14.3 (`.github/workflows/ci.yml`), together with PHPStan at level `max` (`phpstan.neon`) and Opengrep (`.github/workflows/checks.yml`).
 - Run it locally with `composer ci:test:php:unit` or `Build/Scripts/runTests.sh -s unit`.
