@@ -98,7 +98,7 @@ The security assurance case, with the threat model, trust boundaries and what ca
 ## Requirements
 
 - TYPO3 13.4 LTS or 14.3 LTS
-- PHP 8.2, 8.3, 8.4, or 8.5
+- PHP 8.2, 8.3, 8.4, 8.5, or 8.6
 
 ## Development
 
@@ -131,7 +131,7 @@ This extension follows the organisation-wide Netresearch policies:
 Checks that run on pull requests in this repository:
 
 - `.github/workflows/checks.yml`: Composer Audit (fails on an advisory for an installed package) and Opengrep SAST (which findings block is set organisation-wide, see [Static analysis (SAST)](https://github.com/netresearch/.github/blob/main/SECURITY.md#static-analysis-sast)), both through `typo3-ci-workflows`' `security.yml`; Dependency Review (fails on newly added dependencies with a vulnerability of severity high or higher); PHP License Audit (`license-check.yml`, fails on an SSPL or BSL licensed Composer dependency); CodeQL with `languages: auto`, which here analyses the workflow files only, because the repository contains no JavaScript or Go (PHPStan and Opengrep cover the PHP code); Betterleaks secret scanning; zizmor for the workflow files; the pull request quality check (`pr-quality`, on non-draft pull requests only: its Quality Gate job reports the size of the change and warns on large pull requests, its Auto-Approve job approves pull requests opened from this repository by authors GitHub associates with it as owner, member or collaborator); and the aggregate gate `All security checks`, which fails when one of these jobs fails or is cancelled. The fuzz job is skipped because the repository has no `Build/phpunit.xml`, the configuration the reusable `fuzz.yml` looks for.
-- `.github/workflows/ci.yml`: PHP lint, code style (`.php-cs-fixer.php`), PHPStan (`phpstan.neon`) across the matrix, plus an advisory PHPStan pass against the PHPUnit the matrix resolves without the version cap (`PHPStan (unpinned PHPUnit)`), Rector, the unit suite across PHP 8.2 to 8.5 and TYPO3 13.4 and 14.3, the documentation rendering of `Documentation/`, and the aggregate gate `All CI checks`.
+- `.github/workflows/ci.yml`: PHP lint, code style (`.php-cs-fixer.php`), PHPStan (`phpstan.neon`) across the matrix, plus an advisory PHPStan pass against the PHPUnit the matrix resolves without the version cap (`PHPStan (unpinned PHPUnit)`), Rector, the unit suite across PHP 8.2 to 8.6 and TYPO3 13.4 and 14.3, the documentation rendering of `Documentation/`, and the aggregate gate `All CI checks`.
 - `.github/workflows/harness-verify.yml`: `Build/Scripts/verify-harness.sh`.
 - `.github/workflows/check-template-drift.yml`: the `.github/` files that the `typo3-extension` template in `netresearch/.github` manages, except those `.github/template.yaml` lists as intentional drift (`Template drift`).
 - `.github/workflows/labeler.yml`: labels the pull request by the paths it changes.

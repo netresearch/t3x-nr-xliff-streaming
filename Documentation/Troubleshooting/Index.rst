@@ -25,7 +25,7 @@ Composer Install Fails
 
    .. code-block:: bash
 
-      php -v  # Must be 8.2, 8.3, 8.4, or 8.5
+      php -v  # Must be 8.2, 8.3, 8.4, 8.5, or 8.6
 
 2. **Check TYPO3 version**:
 
